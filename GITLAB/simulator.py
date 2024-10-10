@@ -11,7 +11,6 @@ import requests
 from integration import mqtt, http
 from simulation.profile import Profile
 
-
 def init_logging(config):
     level = config['log'].get('level', 'info').upper()
     logging.basicConfig(
@@ -90,3 +89,5 @@ if __name__ == '__main__':
         sys.exit(0)
     except (requests.exceptions.HTTPError, ValueError) as err:
         print(err)
+
+
