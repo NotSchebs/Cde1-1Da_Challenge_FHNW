@@ -58,7 +58,7 @@ coordinates = []
 last_long = 0
 last_lat = 0
 # Process each line
-for line in lines:
+for line in lines[:350]:
     values = line.split(',')
 
     # Ensure we have exactly 5 values
@@ -74,7 +74,7 @@ for line in lines:
 
 # Start Tkinter main loop after adding all markers
 first_lat, first_long = coordinates[0]
-last_lat, last_long = coordinates[len(lines) - 2]
+#last_lat, last_long = coordinates[len(lines) - 2]
 map_widget.set_marker(first_lat, first_long)
 map_widget.set_marker(last_lat, last_long)
 map_widget.set_position(first_lat, first_long,zoom = 0)
