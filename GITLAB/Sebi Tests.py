@@ -69,12 +69,14 @@ for line in lines:
         latitude = float(latitude)
         longitude = float(longitude)
         # Store the coordinates
+        if (latitude, longitude) in coordinates:
+            continue
         coordinates.append((latitude, longitude))
 
 
 # Start Tkinter main loop after adding all markers
 first_lat, first_long = coordinates[0]
-last_lat, last_long = coordinates[len(lines) - 2]
+last_lat, last_long = coordinates[len(coordinates)-1]
 map_widget.set_marker(first_lat, first_long)
 map_widget.set_marker(last_lat, last_long)
 map_widget.set_position(first_lat, first_long,zoom = 0)
