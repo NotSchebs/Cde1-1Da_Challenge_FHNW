@@ -1,7 +1,5 @@
 import tkinter
 import tkintermapview
-from re import split
-
 import requests
 
 # create tkinter window
@@ -26,7 +24,7 @@ data = coords.text
 # Split the data by lines
 lines = data.strip().split('\n')
 
-#Lets try to visualise all the point on the map as a line
+# Let's try to visualise all the point on the map as a line
 coordinates = []
 last_long = 0
 last_lat = 0
@@ -41,18 +39,56 @@ for line in lines:
         # Convert values as needed
         latitude = float(latitude)
         longitude = float(longitude)
+        temperature = float(temperature)
+
         # Store the coordinates
-        if (latitude, longitude) in coordinates:
+        if (latitude, longitude, temperature) in coordinates:
             continue
-        coordinates.append((latitude, longitude))
+        coordinates.append((latitude, longitude, temperature))
 
 
 # Start Tkinter main loop after adding all markers
-first_lat, first_long = coordinates[0]
-last_lat, last_long = coordinates[len(coordinates)-1]
-map_widget.set_marker(first_lat, first_long)
-map_widget.set_marker(last_lat, last_long)
-map_widget.set_position(first_lat, first_long,zoom = 0)
-map_widget.set_path(coordinates) # Connect the points with a line
+if coordinates:
+    first_lat, first_long, _ = coordinates[0]
+    last_lat, last_long, _ = coordinates[len(coordinates)-1]
+    map_widget.set_marker(first_lat, first_long)
+    map_widget.set_marker(last_lat, last_long)
+    map_widget.set_position(first_lat, first_long,zoom = 0)
 
+# Function to determine color based on temperature
+def get_color(temperature):
+    if temperature < 0:
+        return 'lightcyan'  # -0 temperatures
+    elif 0 <= temperature < 10:
+        return 'cyan'  # 0-9 temperatures
+    elif 10 <= temperature < 15:
+        return 'mediumspringgreen'  # 10-14 temperatures
+    elif 15 <= temperature < 20:
+        return 'springgreen'  # 15-19 temperatures
+    elif 20 <= temperature < 25:
+        return 'lime'  # 20-24 temperatures
+    elif 25 <= temperature < 30:
+        return 'limegreen'  # 25-29 temperatures
+    elif 30 <= temperature < 35:
+        return 'green'  # 30-34 temperatures
+    elif 35 <= temperature < 40:
+        return 'tomato'  # 35-40 temperatures
+    elif 40 <= temperature < 45:
+        return 'orangered'  # Warm temperatures
+    else:
+        return 'red'  # Hot temperatures
+
+
+# Draw lines between points with varying colors based on temperature
+for i in range(1, len(coordinates)):
+    lat1, lon1, temp1 = coordinates[i - 1]
+    lat2, lon2, temp2 = coordinates[i]
+
+    # Determine the color based on the first point of the segment
+    color = get_color(temp1)
+
+    # Draw the segment with the determined color
+    map_widget.set_path([(lat1, lon1), (lat2, lon2)], color=color)
+
+# Start Tkinter main loop
 root_tk.mainloop()
