@@ -1,8 +1,8 @@
 import tkinter
 import tkintermapview
-from re import split
-
 import requests
+from colorcet import blues
+from holoviews.examples.gallery.apps.bokeh.crossfilter import color
 
 # create tkinter window
 root_tk = tkinter.Tk()
