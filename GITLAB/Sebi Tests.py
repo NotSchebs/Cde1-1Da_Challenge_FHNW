@@ -53,7 +53,7 @@ for i, line in enumerate(lines):
 
 '''
 
-#Lets try to visualise all the point on the map as a line
+# Let's try to visualise all the point on the map as a line
 coordinates = []
 last_long = 0
 last_lat = 0
@@ -68,18 +68,51 @@ for line in lines:
         # Convert values as needed
         latitude = float(latitude)
         longitude = float(longitude)
+        temperature = float(temperature)
+
         # Store the coordinates
-        if (latitude, longitude) in coordinates:
+        if (latitude, longitude, temperature) in coordinates:
             continue
-        coordinates.append((latitude, longitude))
+        coordinates.append((latitude, longitude, temperature))
 
 
 # Start Tkinter main loop after adding all markers
-first_lat, first_long = coordinates[0]
-last_lat, last_long = coordinates[len(coordinates)-1]
-map_widget.set_marker(first_lat, first_long)
-map_widget.set_marker(last_lat, last_long)
-map_widget.set_position(first_lat, first_long,zoom = 0)
-map_widget.set_path(coordinates) # Connect the points with a line
+if coordinates:
+    first_lat, first_long, _ = coordinates[0]
+    last_lat, last_long, _ = coordinates[len(coordinates)-1]
+    map_widget.set_marker(first_lat, first_long)
+    map_widget.set_marker(last_lat, last_long)
+    map_widget.set_position(first_lat, first_long,zoom = 0)
 
+# Function to determine color based on temperature
+def get_color(temperature):
+    if temperature < 0:
+        return 'blue'  # Cold temperatures
+    elif 0 <= temperature < 15:
+        return 'lightblue'  # Cool temperatures
+    elif 15 <= temperature < 25:
+        return 'yellow'  # Mild temperatures
+    elif 25 <= temperature < 35:
+        return 'orange'  # Warm temperatures
+    else:
+        return 'red'  # Hot temperatures
+
+
+# Draw lines between points with varying colors based on temperature
+for i in range(1, len(coordinates)):
+    lat1, lon1, temp1 = coordinates[i - 1]
+    lat2, lon2, temp2 = coordinates[i]
+
+    # Determine the color based on the first point of the segment
+    color = get_color(temp1)
+
+    # Draw the segment with the determined color
+    map_widget.set_path([(lat1, lon1), (lat2, lon2)], color=color)
+
+# Start Tkinter main loop
 root_tk.mainloop()
+
+
+
+
+
