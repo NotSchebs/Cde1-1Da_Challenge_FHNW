@@ -14,12 +14,12 @@ map_widget = tkintermapview.TkinterMapView(root_tk, width=1200, height=1000, cor
 map_widget.pack()
 
 response = requests.get('https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes')
-print(response.status_code)
-print(response.text)
+#print(response.status_code)
+#print(response.text)
 
 coords = requests.get('https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo?start=0&end=-1&format=csv')
 #print(coords.text)
-print('--------------')
+#print('--------------')
 
 data = coords.text
 
