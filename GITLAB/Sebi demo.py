@@ -19,46 +19,19 @@ expand: If set to True, the widget expands to fill any extra space in the window
 
 '''
 # request url for the data and response is the server response
-response = requests.get('https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes')
-#print(response.status_code)
-#print(response.text)
+demo1_response = requests.get('https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes')
+#print(demo1_response.status_code)
+#print(demo1_response.text)
 
 #request url for the coordinates
-coords = requests.get('https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo?start=0&end=-1&format=csv')
-#print(coords.text)
+demo1_coords = requests.get('https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo1?start=0&end=-1&format=csv')
+#print(demo1_coords.text)
 #print('--------------')
 
-data = coords.text # assigning the coordinates df to data
+demo1_data = demo1_coords.text # assigning the coordinates df to data
 
 # Split the data by lines
-lines = data.strip().split('\n')
-
-#Test to see how to separate all the data
-'''# Process each line
-for i, line in enumerate(lines):
-    values = line.split(',')    #split the values 
-
-    # Ensure we have exactly 5 values (date_time, latitude, longitude, temperature, humidity)
-    if len(values) == 5:
-        date_time, latitude, longitude, temperature, humidity = values
-
-        # Convert values as needed
-        latitude = float(latitude)
-        longitude = float(longitude)
-        temperature = float(temperature)
-        humidity = int(humidity)
-
-        # Print or use the data as needed
-        print(f"Date/Time: {date_time}")
-        print(f"Latitude: {latitude}")
-        print(f"Longitude: {longitude}")
-        print(f"Temperature: {temperature}\u00B0C")
-        print(f"Humidity: {humidity}%")
-        print('--------------')
-    else:
-        print(f"Skipped line (unexpected format): {line}")
-
-'''
+lines = demo1_data.strip().split('\n')
 
 # Let's try to visualise all the point on the map as a line
 coordinates = [] # coordinate list with (latitude, longitude and temp)
@@ -102,13 +75,23 @@ if coordinates:
 # Function to determine color based on temperature
 def get_color(temperature):
     if temperature < 0:
-        return 'blue'  # Cold temperatures
-    elif 0 <= temperature < 15:
-        return 'lightblue'  # Cool temperatures
-    elif 15 <= temperature < 25:
-        return 'yellow'  # Mild temperatures
-    elif 25 <= temperature < 35:
-        return 'orange'  # Warm temperatures
+        return 'lightcyan'  # -0 temperatures
+    elif 0 <= temperature < 10:
+        return 'cyan'  # 0-9 temperatures
+    elif 10 <= temperature < 15:
+        return 'mediumspringgreen'  # 10-14 temperatures
+    elif 15 <= temperature < 20:
+        return 'springgreen'  # 15-19 temperatures
+    elif 20 <= temperature < 25:
+        return 'lime'  # 20-24 temperatures
+    elif 25 <= temperature < 30:
+        return 'limegreen'  # 25-29 temperatures
+    elif 30 <= temperature < 35:
+        return 'green'  # 30-34 temperatures
+    elif 35 <= temperature < 40:
+        return 'tomato'  # 35-40 temperatures
+    elif 40 <= temperature < 45:
+        return 'orangered'  # Warm temperatures
     else:
         return 'red'  # Hot temperatures
 
