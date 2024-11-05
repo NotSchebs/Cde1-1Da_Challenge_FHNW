@@ -2,6 +2,7 @@ import tkinter
 import tkintermapview
 import requests
 
+
 # create tkinter window
 root_tk = tkinter.Tk()
 root_tk.geometry(f"{1200}x{1000}")
