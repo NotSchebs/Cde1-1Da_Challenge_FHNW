@@ -30,6 +30,7 @@ coordinates = []
 last_long = 0
 last_lat = 0
 temp = []
+LF = []
 # Process each line
 for line in lines:
     values = line.split(',')
@@ -97,7 +98,31 @@ for i in range(1, len(coordinates)):
 root_tk.mainloop()
 
 # plot Temp
-plt.plot([10, 20, 30, 40, 50, 60, 70], temp)
+plt.plot(temp)
+plt.axis([0, 400, 0, 45])
 plt.ylabel('Temperaturverlauf')
 plt.show()
 
+
+# Beispieldaten
+x = list(range(len(temp)))
+y1 = temp
+y2 = list(reversed(temp))
+
+
+# Neues Figure- und Axes-Objekt erstellen
+fig, ax1 = plt.subplots()
+
+# Zweites Axes erstellen, das dieselbe x-Achse teilt
+ax2 = ax1.twinx()
+
+# Daten auf jedem Axes plotten
+ax1.plot(x, y1, 'b-', label='Temperatur')
+ax2.plot(x, y2, 'r-', label='Luftfeuchtigkeit')
+
+# Y-Achsen-Beschriftungen festlegen
+ax1.set_ylabel('Temperatur', color='b')
+ax2.set_ylabel('Luftfeuchtigkeit', color='r')
+
+# Abbildung anzeigen
+plt.show()
