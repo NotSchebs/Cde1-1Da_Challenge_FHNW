@@ -4,6 +4,7 @@ import requests
 
 
 class MapApp:
+    #Purpose: Manages the Tkinter window and the map widget
     def __init__(self, width=1200, height=1000, title="Map Viewer"):
         #Initialize the Tkinter window and map widget
         self.root = tk.Tk()
@@ -20,7 +21,7 @@ class MapApp:
         #Add a marker to the map at the specified coordinates with a label
         self.map_widget.set_marker(latitude, longitude, label)
 
-    def add_path(self, path, color="black"):
+    def add_path(self, path, color):
         #Draw a line path on the map between a sequence of points
         self.map_widget.set_path(path, color=color)
 
@@ -30,6 +31,7 @@ class MapApp:
 
 
 class RouteData:
+    #Purpose: Handles fetching and parsing route data from a URL
     def __init__(self, url):
         #Fetch and store route data from a given URL
         self.data = self.fetch_data(url)
@@ -59,6 +61,7 @@ class RouteData:
 
 
 class RouteVisualizer:
+    #Purpose: Responsible for visualizing the route on the map using the provided coordinates and humidity data
     def __init__(self, map_app, coordinates, humidity_data):
         #Initialize with a MapApp instance and route data
         self.map_app = map_app
