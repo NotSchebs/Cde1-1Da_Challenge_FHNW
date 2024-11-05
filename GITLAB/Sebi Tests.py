@@ -1,6 +1,6 @@
 import tkinter
 import tkintermapview
-from re import split
+# from re-import split
 
 import requests
 
@@ -55,6 +55,8 @@ for i, line in enumerate(lines):
 
 # Let's try to visualise all the point on the map as a line
 coordinates = []
+humidity_change = []
+humidity_coordinates = []
 last_long = 0
 last_lat = 0
 # Process each line
@@ -69,20 +71,25 @@ for line in lines:
         latitude = float(latitude)
         longitude = float(longitude)
         temperature = float(temperature)
+        humidity = float(humidity)
 
         # Store the coordinates
         if (latitude, longitude, temperature) in coordinates:
             continue
         coordinates.append((latitude, longitude, temperature))
-
+        humidity_coordinates.append((latitude, longitude, humidity))
+        humidity_change.append(humidity)
 
 # Start Tkinter main loop after adding all markers
 if coordinates:
     first_lat, first_long, _ = coordinates[0]
     last_lat, last_long, _ = coordinates[len(coordinates)-1]
-    map_widget.set_marker(first_lat, first_long)
+    map_widget.set_marker(first_lat, first_long, str('Start Humidity: '+str(humidity_change[0])))
     map_widget.set_marker(last_lat, last_long)
     map_widget.set_position(first_lat, first_long,zoom = 0)
+    for i in range(len(humidity_coordinates) - 1):
+        if humidity_coordinates[i][2] != humidity_coordinates[i + 1][2]:
+            map_widget.set_marker(humidity_coordinates[i+1][0], humidity_coordinates[i+1][1],str('Humidity: '+str(humidity_coordinates[i+1][2])))
 
 # Function to determine color based on temperature
 def get_color(temperature):
