@@ -4,6 +4,9 @@ import requests
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
+# make it interactive (chose which map you want or custom map)
+#fruit thing 
+
 
 class MapApp:
     def __init__(self, width=1200, height=1000, title="Map Viewer"):
