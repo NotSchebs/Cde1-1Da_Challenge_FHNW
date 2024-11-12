@@ -1,129 +1,177 @@
-import tkinter
+import tkinter as tk
 import tkintermapview
-# from re-import split
-
 import requests
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
-# create tkinter window
-root_tk = tkinter.Tk()
-root_tk.geometry(f"{1200}x{1000}")  # margins of the window
-root_tk.title("map_view_example.py")    # title of the pop - up
+# make it interactive (chose which map you want or custom map)
+#fruit thing
 
-# create map widget
-map_widget = tkintermapview.TkinterMapView(root_tk, width=1200, height=1000, corner_radius=0) # margins of the map
-map_widget.pack()   # The .pack() method controls how widgets are placed in the window
-'''
-side: Determines which side of the window to place the widget on ("top", "bottom", "left", "right").
-fill: Specifies if the widget should expand to fill available space. Options include "x" (horizontal), "y" (vertical), or "both".
-expand: If set to True, the widget expands to fill any extra space in the window.
+class MapApp:
+    def __init__(self, width=1200, height=1000, title="Map Viewer"):
+        #Initialize the Tkinter window and map widget
+        self.root = tk.Tk()
+        self.root.geometry(f"{width}x{height}")
+        self.root.title(title)
+        self.map_widget = tkintermapview.TkinterMapView(self.root, width=width, height=height, corner_radius=0)
+        self.map_widget.pack()
 
-'''
-# request url for the data and response is the server response
-response = requests.get('https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes')
-#print(response.status_code)
-#print(response.text)
+    def set_initial_position(self, latitude, longitude, zoom=0):
+        #Set the map's initial position and zoom level
+        self.map_widget.set_position(latitude, longitude, zoom)
 
-#request url for the coordinates
-coords = requests.get('https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo?start=0&end=-1&format=csv')
-#print(coords.text)
-#print('--------------')
+    def add_marker(self, latitude, longitude, label):
+        #Add a marker to the map at the specified coordinates with a label
+        self.map_widget.set_marker(latitude, longitude, label)
 
-data = coords.text # assigning the coordinates df to data
+    def add_path(self, path, color="black"):
+        #Draw a line path on the map between a sequence of points
+        self.map_widget.set_path(path, color=color)
 
-# Split the data by lines
-lines = data.strip().split('\n')
-
-#Test to see how to separate all the data
-'''# Process each line
-for i, line in enumerate(lines):
-    values = line.split(',')    #split the values 
-
-    # Ensure we have exactly 5 values (date_time, latitude, longitude, temperature, humidity)
-    if len(values) == 5:
-        date_time, latitude, longitude, temperature, humidity = values
-
-        # Convert values as needed
-        latitude = float(latitude)
-        longitude = float(longitude)
-        temperature = float(temperature)
-        humidity = int(humidity)
-
-        # Print or use the data as needed
-        print(f"Date/Time: {date_time}")
-        print(f"Latitude: {latitude}")
-        print(f"Longitude: {longitude}")
-        print(f"Temperature: {temperature}\u00B0C")
-        print(f"Humidity: {humidity}%")
-        print('--------------')
-    else:
-        print(f"Skipped line (unexpected format): {line}")
-
-'''
-
-# Let's try to visualise all the point on the map as a line
-coordinates = [] # coordinate list with (latitude, longitude and temp)
-humidity_coordinates = []   # coordinate list with (latitude, longitude and Humidity)
-last_long = 0
-last_lat = 0
-# Process each line
-for line in lines:
-    values = line.split(',')
-
-    # Ensure we have exactly 5 values
-    if len(values) == 5:
-        date_time, latitude, longitude, temperature, humidity = values
-
-        # Convert values as needed
-        latitude = float(latitude)
-        longitude = float(longitude)
-        temperature = float(temperature)
-        humidity = int(humidity)
-
-        # Store the coordinates
-        if (latitude, longitude, temperature) in coordinates: # check if suddenly a coordinate is double(since its one-way)
-            continue
-        coordinates.append((latitude, longitude, temperature))
-        humidity_coordinates.append((latitude, longitude, humidity))
-
-# Start Tkinter main loop after adding all markers
-if coordinates:
-    first_lat, first_long, _ = coordinates[0]
-    last_lat, last_long, _ = coordinates[len(coordinates)-1]
-
-    map_widget.set_marker(first_lat, first_long, str('Starting point! Humidity: '+str(humidity_coordinates[0][2])+'%')) # Staritng point
-    map_widget.set_marker(last_lat, last_long) # destination point
-    map_widget.set_position(first_lat, first_long,zoom = 0) #get the map to pop up at the right position (if you don't do that it'll pop up in berlin
-
-    # humidity markers
-    for i in range(len(humidity_coordinates) - 1):
-        if humidity_coordinates[i][2] != humidity_coordinates[i + 1][2]:
-            map_widget.set_marker(humidity_coordinates[i+1][0], humidity_coordinates[i+1][1],str('Humidity: '+str(humidity_coordinates[i+1][2])+'%'))
-
-# Function to determine color based on temperature
-def get_color(temperature):
-    if temperature < 0:
-        return 'blue'  # Cold temperatures
-    elif 0 <= temperature < 15:
-        return 'lightblue'  # Cool temperatures
-    elif 15 <= temperature < 25:
-        return 'yellow'  # Mild temperatures
-    elif 25 <= temperature < 35:
-        return 'orange'  # Warm temperatures
-    else:
-        return 'red'  # Hot temperatures
+    def run(self):
+        #Start the Tkinter main loop
+        self.root.mainloop()
 
 
-# Draw lines between points with varying colors based on temperature
-for i in range(1, len(coordinates)):
-    lat1, lon1, temp1 = coordinates[i - 1]
-    lat2, lon2, temp2 = coordinates[i]
+class RouteData:
+    def __init__(self, url):
+        #Fetch and store route data from a given URL
+        self.data = self.fetch_data(url)
 
-    # Determine the color based on the first point of the segment
-    color = get_color(temp1)
+    @staticmethod
+    def fetch_data(url):
+        #Request data from a URL and return as plain text
+        response = requests.get(url)
+        return response.text
 
-    # Draw the segment with the determined color
-    map_widget.set_path([(lat1, lon1), (lat2, lon2)], color=color)
+    def parse_data(self):
+        #Parse the CSV route data into a list of (lat, lon, temperature, humidity) tuples
+        lines = self.data.strip().split('\n')
+        coordinates = []
+        humidity_data = []
+        temp = []
+        LF = []
 
-# Start Tkinter main loop
-root_tk.mainloop()
+        for line in lines:
+            values = line.split(',')
+            if len(values) == 5:
+                _, latitude, longitude, temperature, humidity = values
+                if (latitude, longitude, temperature) in coordinates:
+                    continue
+                coordinates.append((float(latitude), float(longitude), float(temperature)))
+                humidity_data.append((float(latitude), float(longitude), int(humidity)))
+                temp.append(float(temperature))
+                LF.append(float(humidity))
 
+        return coordinates, humidity_data , temp, LF
+
+
+class RouteVisualizer:
+    def __init__(self, map_app, coordinates, humidity_data):
+        #Initialize with a MapApp instance and route data
+        self.map_app = map_app
+        self.coordinates = coordinates
+        self.humidity_data = humidity_data
+
+    @staticmethod
+    def get_color(temperature):
+        #Determine line color based on temperature
+        if temperature < 0:
+            return 'lightcyan'
+        elif 0 <= temperature < 10:
+            return 'cyan'
+        elif 10 <= temperature < 15:
+            return 'mediumspringgreen'
+        elif 15 <= temperature < 20:
+            return 'springgreen'
+        elif 20 <= temperature < 25:
+            return 'lime'
+        elif 25 <= temperature < 30:
+            return 'limegreen'
+        elif 30 <= temperature < 35:
+            return 'green'
+        elif 35 <= temperature < 40:
+            return 'tomato'
+        elif 40 <= temperature < 45:
+            return 'orangered'
+        else:
+            return 'red'
+
+    def add_markers(self):
+        #Add starting, destination, and humidity markers
+        if self.coordinates:
+            start_lat, start_lon, _ = self.coordinates[0]
+            end_lat, end_lon, _ = self.coordinates[-1]
+
+            # Starting and destination markers
+            self.map_app.add_marker(start_lat, start_lon, f'Starting point! Humidity: {self.humidity_data[0][2]}%')
+            self.map_app.add_marker(end_lat, end_lon, f'Destination! Humidity: {self.humidity_data[-1][2]}%')
+            self.map_app.set_initial_position(start_lat, start_lon, zoom=10)
+
+            # Humidity markers
+            for i in range(len(self.humidity_data) - 1):
+                if self.humidity_data[i][2] != self.humidity_data[i + 1][2]:
+                    lat, lon, humidity = self.humidity_data[i + 1]
+                    self.map_app.add_marker(lat, lon, f'Humidity: {humidity}%')
+
+    def draw_paths(self):
+        #Draw paths between coordinates with color indicating temperature
+        for i in range(1, len(self.coordinates)):
+            lat1, lon1, temp1 = self.coordinates[i - 1]
+            lat2, lon2, temp2 = self.coordinates[i]
+            color = self.get_color(temp1)
+            self.map_app.add_path([(lat1, lon1), (lat2, lon2)], color=color)
+
+    def visualize(self):
+        #Run visualization by adding markers and drawing paths
+        self.add_markers()
+        self.draw_paths()
+
+
+# Main Execution
+if __name__ == "__main__":
+    # Initialize Map Application
+    app = MapApp()
+
+    # Fetch route data
+    route_url = 'https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo2_extremvieledaten?start=0&end=-1&format=csv'
+    route_data = RouteData(route_url)
+    coordinates, humidity_data, temp, LF = route_data.parse_data()
+
+    # Visualize route
+    visualizer = RouteVisualizer(app, coordinates, humidity_data)
+    visualizer.visualize()
+
+    # Implementieren der Daten (Raumtemperatur(temp)) und (Luftfeuchtigkeit(LF))
+    #Für die X achse wird die Anzahl werte von der Raumtemperatur genommen da sie gleich viele werte hat wie die Luftfeuchtigkeit
+    x = list(range(len(temp)))
+    y1 = temp
+    y2 = LF
+
+    # Neues Figure- und Axes-Objekt erstellen
+    fig, ax1 = plt.subplots()
+
+    # Zweites Axes erstellen, das dieselbe x-Achse teilt
+    ax2 = ax1.twinx()
+
+    # Daten auf jedem Axes plotten
+    ax1.plot(x, y1, 'b-', label='Temperatur')
+    ax2.plot(x, y2, 'r-', label='Luftfeuchtigkeit')
+
+    # Y-Achsen-Beschriftungen festlegen
+    ax1.set_ylabel('Temperatur', color='b')
+    ax2.set_ylabel('Luftfeuchtigkeit', color='r')
+
+    # X-Achsen-Beschriftung hinzufügen
+    ax1.set_xlabel('Zurückgelegte Strecke in %', color='g')
+
+    #X-Achsen-Beschriftungen in Prozent festlegen
+    ax1.set_xlim(0, len(x) - 1)
+    ax1.xaxis.set_major_locator(ticker.MultipleLocator((len(x)-1) / 10))
+    ax1.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(round(x / (len(temp) - 1) * 100))}%'))
+
+    # Abbildung anzeigen
+    plt.show()
+
+    # Run the Tkinter app
+    app.run()

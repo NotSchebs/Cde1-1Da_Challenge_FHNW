@@ -3,6 +3,7 @@ from tkinter import ttk
 
 import tkintermapview
 import requests
+from pandas.io.pytables import dropna_doc
 
 
 class MapApp:
