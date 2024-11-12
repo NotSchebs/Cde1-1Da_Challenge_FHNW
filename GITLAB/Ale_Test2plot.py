@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 import tkintermapview
 import requests
 import matplotlib.pyplot as plt
@@ -170,6 +171,35 @@ if __name__ == "__main__":
 
     # Abbildung anzeigen
     plt.show()
+    # Funktion, um die Legende zu erstellen
+    def erstelle_legende():
+        popup = tk.Tk()
+        popup.wm_title("Farbverlauf Legende")
+
+        label = ttk.Label(popup, text="Farbverlauf für Temperaturen")
+        label.pack(side="top", fill="x", pady=10)
+
+        temperaturbereiche = [
+            ("unter 0", 0), (0, 9), (10, 14), (15, 19), (20, 24),
+            (25, 29), (30, 34), (35, 39), (40, 44), ("über 44", 50)
+        ]
+
+        for (start, end) in temperaturbereiche:
+            frame = ttk.Frame(popup)
+            farbe = RouteVisualizer.get_color((start if isinstance(start, int) else end - 10))
+            beschriftung = f"{start}°C - {end}°C" if isinstance(start, int) else f"{start}"
+            farb_label = ttk.Label(frame, text=beschriftung, background=farbe, width=20)
+            farb_label.pack(side="left", padx=10)
+            frame.pack(side="top", fill="x", pady=5)
+
+        schliessen_button = ttk.Button(popup, text="Schließen", command=popup.destroy)
+        schliessen_button.pack(side="top", pady=10)
+
+        popup.mainloop()
+
+
+    # Beispiel-Aufruf der Funktion
+    erstelle_legende()
 
     # Run the Tkinter app
     app.run()
