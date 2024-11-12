@@ -1,4 +1,6 @@
 import tkinter as tk
+from tkinter import ttk
+
 import tkintermapview
 import requests
 
@@ -10,6 +12,8 @@ class MapApp:
         self.root = tk.Tk()
         self.root.geometry(f"{width}x{height}")
         self.root.title(title)
+
+        # Create map widget
         self.map_widget = tkintermapview.TkinterMapView(self.root, width=width, height=height, corner_radius=0)
         self.map_widget.pack()
 
@@ -123,10 +127,10 @@ class RouteVisualizer:
         self.draw_paths()
 
 
-# Main Execution
 if __name__ == "__main__":
     # Initialize Map Application
     app = MapApp()
+
 
     # Fetch route data
     route_url = 'https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo1?start=0&end=-1&format=csv'
