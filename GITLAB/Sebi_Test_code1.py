@@ -1,4 +1,6 @@
 import tkinter as tk
+from tkinter import messagebox
+
 import tkintermapview
 import requests
 import matplotlib.pyplot as plt
@@ -128,13 +130,47 @@ class RouteVisualizer:
         self.draw_paths()
 
 
+def submit_selection(var, popup2):
+    selected_option = var.get()
+    if selected_option:
+        messagebox.showinfo("Selection", f"You selected: {selected_option}")
+        popup2.destroy()  # Close the window after selection
+    else:
+        messagebox.showwarning("No selection", "Please select an option.")
+
+
+def map_options():
+    popup2 = tk.Tk()
+    popup2.title("Map")
+    popup2.geometry("600x400")
+
+    # Variable to store the selected option
+    var = tk.StringVar(value="")
+
+    options = [
+        ('Map demo1', 'https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo1?start=0&end=-1&format=csv'),
+        ('Map demo2','https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo2_extremvieledaten?start=0&end=-1&format=csv')
+    ]
+    for label, url in options:
+        radio_button = tk.Radiobutton(popup2, text=label, variable=var, value=url)
+        radio_button.pack(anchor="w")
+
+    # Submit button to confirm selection
+    submit_button = tk.Button(popup2, text="Submit", command=lambda: submit_selection(var, popup2))
+    submit_button.pack(pady=20)
+
+    popup2.wait_window()  # Wait for the popup window to close
+    return var.get()  # Return the value selected by the user (not the StringVar object)
+
 # Main Execution
 if __name__ == "__main__":
     # Initialize Map Application
-    app = MapApp()
+    selected_url = map_options()
+    print("Selected URL:", selected_url)
 
+    app = MapApp()
     # Fetch route data
-    route_url = 'https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo2_extremvieledaten?start=0&end=-1&format=csv'
+    route_url = selected_url
     route_data = RouteData(route_url)
     coordinates, humidity_data, temp, LF = route_data.parse_data()
 
