@@ -43,17 +43,6 @@ class RouteData:
         self.data = self.fetch_data(url)
 
     @staticmethod
-    def is_valid_url(url):
-        # Regular expression to validate the URL
-        url_regex = re.compile(
-            r'^(?:http|https)://'  # http:// or https://
-            r'(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}'  # domain
-            r'(?::\d{2,5})?'  # optional port
-            r'(?:[/?#]\S*)?$', re.IGNORECASE  # path/query fragment
-        )
-        return re.match(url_regex, url) is not None
-
-    @staticmethod
     def fetch_data(url):
         #Request data from a URL and return as plain text
         response = requests.get(url)
@@ -79,6 +68,79 @@ class RouteData:
                 LF.append(float(humidity))
 
         return coordinates, humidity_data , temp, LF
+
+class RouteSelector:
+    def __init__(self, options = None):
+        """
+               Initialize the selector with route options.
+               Default options are used if none are provided.
+               """
+        self.default_options = [
+            ('Route Map demo1',
+             'https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo1?start=0&end=-1&format=csv'),
+            ('Route Map demo2',
+             'https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo2_extremvieledaten?start=0&end=-1&format=csv')
+        ]
+        # Use provided options if available; otherwise, use default options
+        self.options = options if options is not None else self.default_options
+        self.selected_url = None  # Store the selected URL
+
+    @staticmethod
+    def is_valid_url(url):
+        # Regular expression to validate the URL
+        url_regex = re.compile(
+            r'^(?:http|https)://'  # http:// or https://
+            r'(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}'  # domain
+            r'(?::\d{2,5})?'  # optional port
+            r'(?:[/?#]\S*)?$', re.IGNORECASE  # path/query fragment
+        )
+        return re.match(url_regex, url) is not None
+
+    def submit_selection(self,var, popup, label, custom_entry):
+        """Handle the submission of the selected option or custom URL."""
+        selected_option = var.get()
+        selected_label = label
+        if selected_option == "Custom Map URL":  # selected option
+            selected_label = "Custom Map URL"  # label
+            selected_option = custom_entry.get()
+            if not self.is_valid_url(selected_option):  # Check if it's a valid URL
+                messagebox.showwarning("Invalid URL", "Please enter a valid URL.")
+
+        elif selected_option:
+            messagebox.showinfo("Selection", f"You selected: {selected_label}")
+            self.selected_url = selected_option
+            popup.destroy()  # Close the window after selection
+        else:
+            messagebox.showwarning("No selection", "Please select an option.")
+
+    def map_options(self):
+        """Create the popup to Select the route or to enter a custom URL for the route"""
+
+        popup = tk.Tk()
+        popup.title("Select route!")
+        #popup.geometry("600x400")
+
+        # Variable to store the selected option
+        var = tk.StringVar(value="")
+
+        for label, url in self.options:
+            radio_button = tk.Radiobutton(popup, text=label, variable=var, value=url).pack(anchor="w")
+
+        # Add a radio button for the "Other" option
+        other_radio_button = tk.Radiobutton(popup, text="Custom Map URL", variable=var, value="Custom Map URL").pack(anchor="w")
+
+        # Entry box for custom input (always visible)
+        custom_entry = tk.Entry(popup)
+        custom_entry.pack(anchor="w", padx=20, pady=5)
+
+        # Submit button to confirm selection
+        submit_button = tk.Button(popup, text="Submit",
+                                  command=lambda: self.submit_selection(var, popup, label, custom_entry))
+        submit_button.pack(pady=20)
+
+        popup.wait_window()  # Wait for the popup window to close
+
+        return self.selected_url  # Return the selected URL after the window is closed
 
 
 class RouteVisualizer:
@@ -142,67 +204,16 @@ class RouteVisualizer:
         self.add_markers()
         self.draw_paths()
 
-##### chose options
-
-def submit_selection(var, popup2, label,custom_entry, result):
-    selected_option = var.get()
-    selected_label = label
-    # If no predefined option is selected, use the custom entry text
-    if selected_option == "Custom Map URL": #selected option
-        selected_label = "Custom Map URL" #label
-        selected_option = custom_entry.get()
-        if not RouteData.is_valid_url(selected_option):  # Check if it's a valid URL
-            messagebox.showwarning("Invalid URL", "Please enter a valid URL.")
-
-    elif selected_option:
-        messagebox.showinfo("Selection", f"You selected: {selected_label}")
-        result.append(selected_option)
-        popup2.destroy()  # Close the window after selection
-    else:
-        messagebox.showwarning("No selection", "Please select an option.")
-
-
-def map_options():
-    popup2 = tk.Tk()
-    popup2.title("Select route!")
-    popup2.geometry("600x400")
-
-    # Variable to store the selected option
-    var = tk.StringVar(value="")
-
-    result = []
-
-    options = [
-        ('Route Map demo1', 'https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo1?start=0&end=-1&format=csv'),
-        ('Route Map demo2','https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo2_extremvieledaten?start=0&end=-1&format=csv')
-    ]
-    for label, url in options:
-        radio_button = tk.Radiobutton(popup2, text=label, variable=var, value=url)
-        radio_button.pack(anchor="w")
-
-    # Add a radio button for the "Other" option
-    other_radio_button = tk.Radiobutton(popup2, text="Custom Map URL", variable=var, value="Custom Map URL")
-    other_radio_button.pack(anchor="w")
-
-    # Entry box for custom input (always visible)
-    custom_entry = tk.Entry(popup2)
-    custom_entry.pack(anchor="w", padx=20, pady=5)
-
-    # Submit button to confirm selection
-    submit_button = tk.Button(popup2, text="Submit", command=lambda: submit_selection(var, popup2, label,custom_entry, result))
-    submit_button.pack(pady=20)
-
-    popup2.wait_window()  # Wait for the popup window to close
-
-    return result[0] if result else None # Return the value selected by the user (not the StringVar object)
 
 # Main Execution
 if __name__ == "__main__":
 
-    # Initialize Map Application
-    selected_url = map_options()
+    #create Map selection popup
+    selector = RouteSelector()
+    selected_url = selector.map_options()
     print("Selected URL:", selected_url)
 
+    # Initialize Map Application
     app = MapApp()
     # Fetch route data
     route_url = selected_url

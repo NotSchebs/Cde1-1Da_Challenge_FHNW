@@ -1,10 +1,14 @@
 import tkinter as tk
+from tkinter import messagebox
+import re
+
 import tkintermapview
 import requests
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+from shapely.creation import empty
 
-# make it interactive (chose which map you want or custom map)
+
 #fruit thing
 
 class MapApp:
@@ -39,6 +43,17 @@ class RouteData:
         self.data = self.fetch_data(url)
 
     @staticmethod
+    def is_valid_url(url):
+        # Regular expression to validate the URL
+        url_regex = re.compile(
+            r'^(?:http|https)://'  # http:// or https://
+            r'(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}'  # domain
+            r'(?::\d{2,5})?'  # optional port
+            r'(?:[/?#]\S*)?$', re.IGNORECASE  # path/query fragment
+        )
+        return re.match(url_regex, url) is not None
+
+    @staticmethod
     def fetch_data(url):
         #Request data from a URL and return as plain text
         response = requests.get(url)
@@ -64,7 +79,6 @@ class RouteData:
                 LF.append(float(humidity))
 
         return coordinates, humidity_data , temp, LF
-
 
 class RouteVisualizer:
     def __init__(self, map_app, coordinates, humidity_data):
@@ -127,14 +141,71 @@ class RouteVisualizer:
         self.add_markers()
         self.draw_paths()
 
+##### chose options
+
+def submit_selection(var, popup2, label,custom_entry, result):
+    selected_option = var.get()
+    selected_label = label
+    # If no predefined option is selected, use the custom entry text
+    if selected_option == "Custom Map URL": #selected option
+        selected_label = "Custom Map URL" #label
+        selected_option = custom_entry.get()
+        if not RouteData.is_valid_url(selected_option):  # Check if it's a valid URL
+            messagebox.showwarning("Invalid URL", "Please enter a valid URL.")
+
+    elif selected_option:
+        messagebox.showinfo("Selection", f"You selected: {selected_label}")
+        result.append(selected_option)
+        popup2.destroy()  # Close the window after selection
+    else:
+        messagebox.showwarning("No selection", "Please select an option.")
+
+
+def map_options():
+    popup = tk.Tk()
+    popup.title("Select route!")
+    popup.geometry("600x400")
+
+    # Variable to store the selected option
+    var = tk.StringVar(value="")
+
+    result = []
+
+    options = [
+        ('Route Map demo1', 'https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo1?start=0&end=-1&format=csv'),
+        ('Route Map demo2','https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo2_extremvieledaten?start=0&end=-1&format=csv')
+    ]
+    for label, url in options:
+        radio_button = tk.Radiobutton(popup, text=label, variable=var, value=url)
+        radio_button.pack(anchor="w")
+
+    # Add a radio button for the "Other" option
+    other_radio_button = tk.Radiobutton(popup, text="Custom Map URL", variable=var, value="Custom Map URL")
+    other_radio_button.pack(anchor="w")
+
+    # Entry box for custom input (always visible)
+    custom_entry = tk.Entry(popup)
+    custom_entry.pack(anchor="w", padx=20, pady=5)
+
+    # Submit button to confirm selection
+    submit_button = tk.Button(popup, text="Submit", command=lambda: submit_selection(var, popup, label,custom_entry, result))
+    submit_button.pack(pady=20)
+
+    popup.wait_window()  # Wait for the popup window to close
+
+    return result[0] if result else None # Return the value selected by the user (not the StringVar object)
 
 # Main Execution
 if __name__ == "__main__":
+
+    #create Map selection popup
+    selected_url = map_options()
+    print("Selected URL:", selected_url)
+
     # Initialize Map Application
     app = MapApp()
-
     # Fetch route data
-    route_url = 'https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo2_extremvieledaten?start=0&end=-1&format=csv'
+    route_url = selected_url
     route_data = RouteData(route_url)
     coordinates, humidity_data, temp, LF = route_data.parse_data()
 
@@ -175,5 +246,3 @@ if __name__ == "__main__":
 
     # Run the Tkinter app
     app.run()
-
-
