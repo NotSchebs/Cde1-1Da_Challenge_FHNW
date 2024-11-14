@@ -1,7 +1,6 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 import re
-
 import tkintermapview
 import requests
 import matplotlib.pyplot as plt
@@ -208,8 +207,41 @@ if __name__ == "__main__":
     selected_url = selector.map_options()
     print("Selected URL:", selected_url)
 
+    """################################
+
+    # Funktion, um die Legende zu erstellen
+    def erstelle_legende():
+        popup2 = tk.Toplevel()  # Use Toplevel for non-blocking window
+        popup2.wm_title("Farbverlauf Legende")
+
+        label = ttk.Label(popup2, text="Farbverlauf für Temperaturen")
+        label.pack(side="top", fill="x", pady=10)
+
+        temperaturbereiche = [
+            ("unter 0", 0), (0, 9), (10, 14), (15, 19), (20, 24),
+            (25, 29), (30, 34), (35, 39), (40, 44), ("über 44", 50)
+        ]
+
+        for (start, end) in temperaturbereiche:
+            frame = ttk.Frame(popup2)
+            farbe = RouteVisualizer.get_color((start if isinstance(start, int) else end - 10))
+
+            beschriftung = f"{start}°C - {end}°C" if isinstance(start, int) else f"{start}"
+
+            farb_label = ttk.Label(frame, text=beschriftung, background=farbe, width=20)
+            farb_label.pack(side="left", padx=10)
+            frame.pack(side="top", fill="x", pady=5)
+
+        schliessen_button = ttk.Button(popup2, text="Schließen", command=popup2.destroy)
+        schliessen_button.pack(side="top", pady=10)
+
+        popup2.mainloop()  # Start the Tkinter loop for the legend popup
+
+    ################################ """
+
     # Initialize Map Application
     app = MapApp()
+
     # Fetch route data
     route_url = selected_url
     route_data = RouteData(route_url)
@@ -218,6 +250,10 @@ if __name__ == "__main__":
     # Visualize route
     visualizer = RouteVisualizer(app, coordinates, humidity_data)
     visualizer.visualize()
+
+    """erstelle_legende()"""
+    # Run the Tkinter app
+    app.run()
 
     # Implementieren der Daten (Raumtemperatur(temp)) und (Luftfeuchtigkeit(LF))
     #Für die X achse wird die Anzahl werte von der Raumtemperatur genommen da sie gleich viele werte hat wie die Luftfeuchtigkeit
@@ -249,6 +285,3 @@ if __name__ == "__main__":
 
     # Abbildung anzeigen
     plt.show()
-
-    # Run the Tkinter app
-    app.run()
