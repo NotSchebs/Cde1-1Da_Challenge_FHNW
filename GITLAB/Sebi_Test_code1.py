@@ -148,8 +148,8 @@ def submit_selection(var, popup2, label,custom_entry, result):
     selected_option = var.get()
     selected_label = label
     # If no predefined option is selected, use the custom entry text
-    if selected_option == "Custom Url": #selected option
-        selected_label = "Custom Url" #label
+    if selected_option == "Custom Map URL": #selected option
+        selected_label = "Custom Map URL" #label
         selected_option = custom_entry.get()
         if not RouteData.is_valid_url(selected_option):  # Check if it's a valid URL
             messagebox.showwarning("Invalid URL", "Please enter a valid URL.")
@@ -181,7 +181,7 @@ def map_options():
         radio_button.pack(anchor="w")
 
     # Add a radio button for the "Other" option
-    other_radio_button = tk.Radiobutton(popup2, text="Custom Url", variable=var, value="Custom Url")
+    other_radio_button = tk.Radiobutton(popup2, text="Custom Map URL", variable=var, value="Custom Map URL")
     other_radio_button.pack(anchor="w")
 
     # Entry box for custom input (always visible)
