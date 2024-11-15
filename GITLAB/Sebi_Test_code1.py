@@ -252,8 +252,7 @@ if __name__ == "__main__":
     visualizer.visualize()
 
     """erstelle_legende()"""
-    # Run the Tkinter app
-    app.run()
+
 
     # Implementieren der Daten (Raumtemperatur(temp)) und (Luftfeuchtigkeit(LF))
     #Für die X achse wird die Anzahl werte von der Raumtemperatur genommen da sie gleich viele werte hat wie die Luftfeuchtigkeit
@@ -285,3 +284,5 @@ if __name__ == "__main__":
 
     # Abbildung anzeigen
     plt.show()
+    # Run the Tkinter app
+    app.run()
