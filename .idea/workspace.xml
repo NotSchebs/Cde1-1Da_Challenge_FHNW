@@ -96,6 +96,7 @@
       <workItem from="1731613045571" duration="618000" />
       <workItem from="1731619345185" duration="5769000" />
       <workItem from="1731681652962" duration="1023000" />
+      <workItem from="1731692307160" duration="1600000" />
     </task>
     <servers />
   </component>
@@ -109,7 +110,7 @@
     <SUITE FILE_PATH="coverage/Cde1_1Da$Ale_Test2plot.coverage" NAME="Ale_Test2plot Coverage Results" MODIFIED="1731624717324" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
     <SUITE FILE_PATH="coverage/Cde1_1Da$Sebi_demo2.coverage" NAME="Sebi demo2 Coverage Results" MODIFIED="1731681989312" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
     <SUITE FILE_PATH="coverage/Cde1_1Da$Test1.coverage" NAME="Test1 Coverage Results" MODIFIED="1729758027122" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
-    <SUITE FILE_PATH="coverage/Cde1_1Da$Sebi_Test_code1.coverage" NAME="Sebi_Test_code1 Coverage Results" MODIFIED="1731684862665" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
+    <SUITE FILE_PATH="coverage/Cde1_1Da$Sebi_Test_code1.coverage" NAME="Sebi_Test_code1 Coverage Results" MODIFIED="1731694661840" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
     <SUITE FILE_PATH="coverage/Cde1_1Da$Sebi_demo.coverage" NAME="Sebi demo Coverage Results" MODIFIED="1731414173900" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
   </component>
 </project>
