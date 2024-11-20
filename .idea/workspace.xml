@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2f45e764-2d27-49bd-b526-0261b1dc8361" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="2f45e764-2d27-49bd-b526-0261b1dc8361" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -101,6 +99,7 @@
       <workItem from="1731704723577" duration="6000" />
       <workItem from="1731767130218" duration="114000" />
       <workItem from="1731774381264" duration="449000" />
+      <workItem from="1732099951019" duration="259000" />
     </task>
     <servers />
   </component>
@@ -114,7 +113,7 @@
     <SUITE FILE_PATH="coverage/Cde1_1Da$Ale_Test2plot.coverage" NAME="Ale_Test2plot Coverage Results" MODIFIED="1731624717324" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
     <SUITE FILE_PATH="coverage/Cde1_1Da$Sebi_demo2.coverage" NAME="Sebi demo2 Coverage Results" MODIFIED="1731681989312" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
     <SUITE FILE_PATH="coverage/Cde1_1Da$Test1.coverage" NAME="Test1 Coverage Results" MODIFIED="1729758027122" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
-    <SUITE FILE_PATH="coverage/Cde1_1Da$Sebi_Test_code1.coverage" NAME="Sebi_Test_code1 Coverage Results" MODIFIED="1731704100809" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
+    <SUITE FILE_PATH="coverage/Cde1_1Da$Sebi_Test_code1.coverage" NAME="Sebi_Test_code1 Coverage Results" MODIFIED="1732100141000" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
     <SUITE FILE_PATH="coverage/Cde1_1Da$Sebi_demo.coverage" NAME="Sebi demo Coverage Results" MODIFIED="1731414173900" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
   </component>
 </project>
