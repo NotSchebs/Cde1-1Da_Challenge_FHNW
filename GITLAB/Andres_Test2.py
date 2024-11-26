@@ -1,15 +1,11 @@
 import tkinter as tk
-from enum import verify
+
 from tkinter import messagebox, ttk
 import re
 import tkintermapview
 import requests
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-
-# Ignores SSL certificate warnings
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 #fruit thing
