@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2f45e764-2d27-49bd-b526-0261b1dc8361" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GITLAB/Sebi_Test_code1.py" beforeDir="false" afterPath="$PROJECT_DIR$/GITLAB/Sebi_Test_code1.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -45,26 +46,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.Ale Test.executor": "Run",
-    "Python.Ale_Test2plot.executor": "Run",
-    "Python.Sebi Tests.executor": "Run",
-    "Python.Sebi demo.executor": "Run",
-    "Python.Sebi demo2.executor": "Run",
-    "Python.Sebi_Test_code1.executor": "Run",
-    "Python.Test1.executor": "Run",
-    "Python.clean_code.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.Ale_Test2plot.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Sebi Tests.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Sebi demo.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Sebi demo2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Sebi_Test_code1.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Test1.executor&quot;: &quot;Run&quot;,
+    &quot;Python.clean_code.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -104,33 +104,21 @@
       <workItem from="1731774381264" duration="449000" />
       <workItem from="1732099951019" duration="259000" />
       <workItem from="1732620212957" duration="439000" />
-      <workItem from="1732622429826" duration="4592000" />
+      <workItem from="1732622429826" duration="466000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/GITLAB/Sebi_Test_code1.py</url>
-          <line>44</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
-  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Cde1_1Da$Ale_Test.coverage" NAME="Ale Test Coverage Results" MODIFIED="1732624263147" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
     <SUITE FILE_PATH="coverage/Cde1_1Da$Sb_Test.coverage" NAME="Sb Test Coverage Results" MODIFIED="1730379651074" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
     <SUITE FILE_PATH="coverage/Cde1_1Da$clean_code.coverage" NAME="clean_code Coverage Results" MODIFIED="1732622528388" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
     <SUITE FILE_PATH="coverage/Cde1_1Da$Sebi_Tests.coverage" NAME="Sebi Tests Coverage Results" MODIFIED="1730804440774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
     <SUITE FILE_PATH="coverage/Cde1_1Da$Ale_Test2plot.coverage" NAME="Ale_Test2plot Coverage Results" MODIFIED="1731624717324" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
     <SUITE FILE_PATH="coverage/Cde1_1Da$Sebi_demo2.coverage" NAME="Sebi demo2 Coverage Results" MODIFIED="1731681989312" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
     <SUITE FILE_PATH="coverage/Cde1_1Da$Test1.coverage" NAME="Test1 Coverage Results" MODIFIED="1729758027122" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
-    <SUITE FILE_PATH="coverage/Cde1_1Da$Sebi_Test_code1.coverage" NAME="Sebi_Test_code1 Coverage Results" MODIFIED="1732627947280" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
+    <SUITE FILE_PATH="coverage/Cde1_1Da$Sebi_Test_code1.coverage" NAME="Sebi_Test_code1 Coverage Results" MODIFIED="1732622715989" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
     <SUITE FILE_PATH="coverage/Cde1_1Da$Sebi_demo.coverage" NAME="Sebi demo Coverage Results" MODIFIED="1731414173900" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
   </component>
 </project>

@@ -1,0 +1,183 @@
+Index: GITLAB/Andres_Test.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import tkinter as tk\r\nfrom enum import verify\r\nfrom tkinter import messagebox, ttk\r\nimport re\r\nimport tkintermapview\r\nimport requests\r\nimport matplotlib.pyplot as plt\r\nimport matplotlib.ticker as ticker\r\n\r\n\r\n#fruit thing\r\n\r\nclass MapApp:\r\n    def __init__(self, width=1200, height=1000, title=\"Map Viewer\"):\r\n        \"\"\"Initialize the Tkinter window and map widget\"\"\"\r\n        self.root = tk.Tk()\r\n        self.root.geometry(f\"{width}x{height}\")\r\n        self.root.title(title)\r\n        self.map_widget = tkintermapview.TkinterMapView(self.root, width=width, height=height, corner_radius=0)\r\n        self.map_widget.pack()\r\n\r\n    def set_initial_position(self, latitude, longitude, zoom=0):\r\n        \"\"\"Set the map's initial position and zoom level\"\"\"\r\n        self.map_widget.set_position(latitude, longitude, zoom)\r\n\r\n    def add_marker(self, latitude, longitude, label):\r\n        \"\"\"dd a marker to the map at the specified coordinates with a label\"\"\"\r\n        self.map_widget.set_marker(latitude, longitude, label)\r\n\r\n    def add_path(self, path, color=\"black\"):\r\n        \"\"\"Draw a line path on the map between a sequence of points\"\"\"\r\n        self.map_widget.set_path(path, color=color)\r\n\r\n    def run(self):\r\n        \"\"\"Start the Tkinter main loop\"\"\"\r\n        self.root.mainloop()\r\n\r\nclass RouteData:\r\n    def __init__(self, url):\r\n        \"\"\"Fetch and store route data from a given URL\"\"\"\r\n        self.data = self.fetch_data(url)\r\n\r\n    @staticmethod\r\n    def fetch_data(url):\r\n        \"\"\"Request data from a URL and return as plain text\"\"\"\r\n        response = requests.get(url, verify=False)\r\n        return response.text\r\n\r\n    def parse_data(self):\r\n        \"\"\"Parse the CSV route data into a list of (lat, lon, temperature, humidity) tuples\"\"\"\r\n        lines = self.data.strip().split('\\n')\r\n        coordinates = []\r\n        humidity_data = []\r\n        temp = []\r\n        LF = []\r\n\r\n        for line in lines:\r\n            values = line.split(',')\r\n            if len(values) == 5:\r\n                _, latitude, longitude, temperature, humidity = values\r\n                if (latitude, longitude, temperature) in coordinates:\r\n                    continue\r\n                coordinates.append((float(latitude), float(longitude), float(temperature)))\r\n                humidity_data.append((float(latitude), float(longitude), int(humidity)))\r\n                temp.append(float(temperature))\r\n                LF.append(float(humidity))\r\n\r\n        return coordinates, humidity_data , temp, LF\r\n\r\nclass RouteSelector:\r\n    def __init__(self, options = None):\r\n        \"\"\" Initialize the selector with route options.\r\n            Default options are used if none are provided.\"\"\"\r\n\r\n        self.default_options = [\r\n            ('Route Map demo1',\r\n             'https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo?start=0&end=-1&format=csv'),\r\n            ('Route Map demo2',\r\n             'https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo2_extremvieledaten?start=0&end=-1&format=csv')\r\n        ]\r\n        # Use provided options if available; otherwise, use default options\r\n        self.options = options if options is not None else self.default_options\r\n        self.selected_url = None  # Store the selected URL\r\n\r\n    @staticmethod\r\n    def is_valid_url(url):\r\n        \"\"\"Regular expression to validate the URL\"\"\"\r\n        url_regex = re.compile(\r\n            r'^(?:http|https)://'  # http:// or https://\r\n            r'(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}'  # domain\r\n            r'(?::\\d{2,5})?'  # optional port\r\n            r'(?:[/?#]\\S*)?$', re.IGNORECASE  # path/query fragment\r\n        )\r\n        return re.match(url_regex, url) is not None\r\n\r\n    def submit_selection(self,var, popup, label, custom_entry):\r\n        \"\"\"Handle the submission of the selected option or custom URL.\"\"\"\r\n        selected_option = var.get()\r\n        selected_label = label\r\n        if selected_option == \"Custom Map URL\":  # selected option\r\n            selected_label = \"Custom Map URL\"  # label\r\n            selected_option = custom_entry.get()\r\n            if not self.is_valid_url(selected_option):  # Check if it's a valid URL\r\n                messagebox.showwarning(\"Invalid URL\", \"Please enter a valid URL.\")\r\n\r\n        elif selected_option:\r\n            messagebox.showinfo(\"Selection\", f\"You selected: {selected_label}\")\r\n            self.selected_url = selected_option\r\n            popup.destroy()  # Close the window after selection\r\n        else:\r\n            messagebox.showwarning(\"No selection\", \"Please select an option.\")\r\n\r\n    def map_options(self):\r\n        \"\"\"Create the popup to Select the route or to enter a custom URL for the route\"\"\"\r\n\r\n        popup = tk.Tk()\r\n        popup.title(\"Select route!\")\r\n        #popup.geometry(\"600x400\")\r\n\r\n        # Variable to store the selected option\r\n        var = tk.StringVar(value=\"\")\r\n\r\n        for label, url in self.options:\r\n            radio_button = tk.Radiobutton(popup, text=label, variable=var, value=url).pack(anchor=\"w\")\r\n\r\n        # Add a radio button for the \"Other\" option\r\n        other_radio_button = tk.Radiobutton(popup, text=\"Custom Map URL\", variable=var, value=\"Custom Map URL\").pack(anchor=\"w\")\r\n\r\n        # Entry box for custom input (always visible)\r\n        custom_entry = tk.Entry(popup)\r\n        custom_entry.pack(anchor=\"w\", padx=20, pady=5)\r\n\r\n        # Submit button to confirm selection\r\n        submit_button = tk.Button(popup, text=\"Submit\",\r\n                                  command=lambda: self.submit_selection(var, popup, label, custom_entry))\r\n        submit_button.pack(pady=20)\r\n\r\n        popup.wait_window()  # Wait for the popup window to close\r\n\r\n        return self.selected_url  # Return the selected URL after the window is closed\r\n\r\nclass RouteVisualizer:\r\n    def __init__(self, map_app, coordinates, humidity_data):\r\n        \"\"\"Initialize with a MapApp instance and route data\"\"\"\r\n        self.map_app = map_app\r\n        self.coordinates = coordinates\r\n        self.humidity_data = humidity_data\r\n\r\n    @staticmethod\r\n    def get_color(temperature):\r\n        \"\"\"Determine line color based on temperature\"\"\"\r\n        if temperature < 0:\r\n            return 'lightcyan'\r\n        elif 0 <= temperature < 10:\r\n            return 'cyan'\r\n        elif 10 <= temperature < 15:\r\n            return 'mediumspringgreen'\r\n        elif 15 <= temperature < 20:\r\n            return 'springgreen'\r\n        elif 20 <= temperature < 25:\r\n            return 'lime'\r\n        elif 25 <= temperature < 30:\r\n            return 'limegreen'\r\n        elif 30 <= temperature < 35:\r\n            return 'green'\r\n        elif 35 <= temperature < 40:\r\n            return 'tomato'\r\n        elif 40 <= temperature < 45:\r\n            return 'orangered'\r\n        else:\r\n            return 'red'\r\n\r\n    def add_markers(self):\r\n        \"\"\"Add starting, destination, and humidity markers\"\"\"\r\n        if self.coordinates:\r\n            start_lat, start_lon, _ = self.coordinates[0]\r\n            end_lat, end_lon, _ = self.coordinates[-1]\r\n\r\n            # Starting and destination markers\r\n            self.map_app.add_marker(start_lat, start_lon, f'Starting point! Humidity: {self.humidity_data[0][2]}%')\r\n            self.map_app.add_marker(end_lat, end_lon, f'Destination! Humidity: {self.humidity_data[-1][2]}%')\r\n            self.map_app.set_initial_position(start_lat, start_lon, zoom=10)\r\n\r\n            # Humidity markers\r\n            for i in range(len(self.humidity_data) - 1):\r\n                if self.humidity_data[i][2] != self.humidity_data[i + 1][2]:\r\n                    lat, lon, humidity = self.humidity_data[i + 1]\r\n                    self.map_app.add_marker(lat, lon, f'Humidity: {humidity}%')\r\n\r\n    def draw_paths(self):\r\n        \"\"\"Draw paths between coordinates with color indicating temperature\"\"\"\r\n        for i in range(1, len(self.coordinates)):\r\n            lat1, lon1, temp1 = self.coordinates[i - 1]\r\n            lat2, lon2, temp2 = self.coordinates[i]\r\n            color = self.get_color(temp1)\r\n            self.map_app.add_path([(lat1, lon1), (lat2, lon2)], color=color)\r\n\r\n    def visualize(self):\r\n        \"\"\"Run visualization by adding markers and drawing paths\"\"\"\r\n        self.add_markers()\r\n        self.draw_paths()\r\n\r\n# Main Execution\r\nif __name__ == \"__main__\":\r\n\r\n    #create Map selection popup\r\n    selector = RouteSelector()\r\n    selected_url = selector.map_options()\r\n    print(\"Selected URL:\", selected_url)\r\n\r\n    \"\"\"################################\r\n\r\n    # Funktion, um die Legende zu erstellen\r\n    def erstelle_legende():\r\n        popup2 = tk.Toplevel()  # Use Toplevel for non-blocking window\r\n        popup2.wm_title(\"Farbverlauf Legende\")\r\n\r\n        label = ttk.Label(popup2, text=\"Farbverlauf für Temperaturen\")\r\n        label.pack(side=\"top\", fill=\"x\", pady=10)\r\n\r\n        temperaturbereiche = [\r\n            (\"unter 0\", 0), (0, 9), (10, 14), (15, 19), (20, 24),\r\n            (25, 29), (30, 34), (35, 39), (40, 44), (\"über 44\", 50)\r\n        ]\r\n\r\n        for (start, end) in temperaturbereiche:\r\n            frame = ttk.Frame(popup2)\r\n            farbe = RouteVisualizer.get_color((start if isinstance(start, int) else end - 10))\r\n\r\n            beschriftung = f\"{start}°C - {end}°C\" if isinstance(start, int) else f\"{start}\"\r\n\r\n            farb_label = ttk.Label(frame, text=beschriftung, background=farbe, width=20)\r\n            farb_label.pack(side=\"left\", padx=10)\r\n            frame.pack(side=\"top\", fill=\"x\", pady=5)\r\n\r\n        schliessen_button = ttk.Button(popup2, text=\"Schließen\", command=popup2.destroy)\r\n        schliessen_button.pack(side=\"top\", pady=10)\r\n\r\n        popup2.mainloop()  # Start the Tkinter loop for the legend popup\r\n\r\n    ################################ \"\"\"\r\n\r\n    # Initialize Map Application\r\n    app = MapApp()\r\n\r\n    # Fetch route data\r\n    route_url = selected_url\r\n    route_data = RouteData(route_url)\r\n    coordinates, humidity_data, temp, LF = route_data.parse_data()\r\n\r\n    # Visualize route\r\n    visualizer = RouteVisualizer(app, coordinates, humidity_data)\r\n    visualizer.visualize()\r\n\r\n    \"\"\"erstelle_legende()\"\"\"\r\n\r\n\r\n    # Implementieren der Daten (Raumtemperatur(temp)) und (Luftfeuchtigkeit(LF))\r\n    #Für die X achse wird die Anzahl werte von der Raumtemperatur genommen da sie gleich viele werte hat wie die Luftfeuchtigkeit\r\n    x = list(range(len(temp)))\r\n    y1 = temp\r\n    y2 = LF\r\n\r\n    # Neues Figure- und Axes-Objekt erstellen\r\n    fig, ax1 = plt.subplots()\r\n\r\n    # Zweites Axes erstellen, das dieselbe x-Achse teilt\r\n    ax2 = ax1.twinx()\r\n\r\n    # Daten auf jedem Axes plotten\r\n    ax1.plot(x, y1, 'b-', label='Temperatur')\r\n    ax2.plot(x, y2, 'r-', label='Luftfeuchtigkeit')\r\n\r\n    # Y-Achsen-Beschriftungen festlegen\r\n    ax1.set_ylabel('Temperatur', color='b')\r\n    ax2.set_ylabel('Luftfeuchtigkeit', color='r')\r\n\r\n    # X-Achsen-Beschriftung hinzufügen\r\n    ax1.set_xlabel('Zurückgelegte Strecke in %', color='g')\r\n\r\n    #X-Achsen-Beschriftungen in Prozent festlegen\r\n    ax1.set_xlim(0, len(x) - 1)\r\n    ax1.xaxis.set_major_locator(ticker.MultipleLocator((len(x)-1) / 10))\r\n    ax1.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(round(x / (len(temp) - 1) * 100))}%'))\r\n\r\n    # Abbildung anzeigen\r\n    plt.show()\r\n    # Run the Tkinter app\r\n    app.run()\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/GITLAB/Andres_Test.py b/GITLAB/Andres_Test.py
+--- a/GITLAB/Andres_Test.py	(revision 0e05793876ab5e193ff54c62a6d5e28b14c0390f)
++++ b/GITLAB/Andres_Test.py	(date 1732629514634)
+@@ -1,5 +1,4 @@
+ import tkinter as tk
+-from enum import verify
+ from tkinter import messagebox, ttk
+ import re
+ import tkintermapview
+Index: .idea/Cde1-1Da.iml
+===================================================================
+diff --git a/.idea/Cde1-1Da.iml b/.idea/Cde1-1Da.iml
+deleted file mode 100644
+--- a/.idea/Cde1-1Da.iml	(revision 0e05793876ab5e193ff54c62a6d5e28b14c0390f)
++++ /dev/null	(revision 0e05793876ab5e193ff54c62a6d5e28b14c0390f)
+@@ -1,7 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<module version="4">
+-  <component name="PyDocumentationSettings">
+-    <option name="format" value="PLAIN" />
+-    <option name="myDocStringFormat" value="Plain" />
+-  </component>
+-</module>
+\ No newline at end of file
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"2f45e764-2d27-49bd-b526-0261b1dc8361\" name=\"Changes\" comment=\"\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/GITLAB/Sebi_Test_code1.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/GITLAB/Sebi_Test_code1.py\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Python Script\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitHubPullRequestSearchHistory\">{\r\n  &quot;lastFilter&quot;: {\r\n    &quot;state&quot;: &quot;OPEN&quot;,\r\n    &quot;assignee&quot;: &quot;NotSchebs&quot;\r\n  }\r\n}</component>\r\n  <component name=\"GithubPullRequestsUISettings\">{\r\n  &quot;selectedUrlAndAccountId&quot;: {\r\n    &quot;url&quot;: &quot;https://github.com/NotSchebs/Cde1-1Da.git&quot;,\r\n    &quot;accountId&quot;: &quot;c42c0b89-a55b-4090-a22e-470f110cf85d&quot;\r\n  }\r\n}</component>\r\n  <component name=\"HighlightingSettingsPerFile\">\r\n    <setting file=\"file://$PROJECT_DIR$/GITLAB/Sebi_Test_code1.py\" root0=\"SKIP_INSPECTION\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 8\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"2nqCwwExpWe6MpUFe1K1fLyq875\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">{\r\n  &quot;keyToString&quot;: {\r\n    &quot;Python.Ale_Test2plot.executor&quot;: &quot;Run&quot;,\r\n    &quot;Python.Sebi Tests.executor&quot;: &quot;Run&quot;,\r\n    &quot;Python.Sebi demo.executor&quot;: &quot;Run&quot;,\r\n    &quot;Python.Sebi demo2.executor&quot;: &quot;Run&quot;,\r\n    &quot;Python.Sebi_Test_code1.executor&quot;: &quot;Run&quot;,\r\n    &quot;Python.Test1.executor&quot;: &quot;Run&quot;,\r\n    &quot;Python.clean_code.executor&quot;: &quot;Run&quot;,\r\n    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,\r\n    &quot;git-widget-placeholder&quot;: &quot;main&quot;,\r\n    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,\r\n    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,\r\n    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,\r\n    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,\r\n    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,\r\n    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;\r\n  }\r\n}</component>\r\n  <component name=\"SharedIndexes\">\r\n    <attachedChunks>\r\n      <set>\r\n        <option value=\"bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-PY-242.23339.19\" />\r\n        <option value=\"bundled-python-sdk-0029f7779945-399fe30bd8c1-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-242.23339.19\" />\r\n      </set>\r\n    </attachedChunks>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"2f45e764-2d27-49bd-b526-0261b1dc8361\" name=\"Changes\" comment=\"\" />\r\n      <created>1729691461054</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1729691461054</updated>\r\n      <workItem from=\"1729691462216\" duration=\"141000\" />\r\n      <workItem from=\"1730385392472\" duration=\"6188000\" />\r\n      <workItem from=\"1730797709981\" duration=\"130000\" />\r\n      <workItem from=\"1730798554473\" duration=\"15898000\" />\r\n      <workItem from=\"1730822271532\" duration=\"21000\" />\r\n      <workItem from=\"1730832973334\" duration=\"3272000\" />\r\n      <workItem from=\"1730887509426\" duration=\"841000\" />\r\n      <workItem from=\"1730973230070\" duration=\"392000\" />\r\n      <workItem from=\"1731404210289\" duration=\"14157000\" />\r\n      <workItem from=\"1731440116561\" duration=\"66000\" />\r\n      <workItem from=\"1731577424459\" duration=\"182000\" />\r\n      <workItem from=\"1731584803832\" duration=\"170000\" />\r\n      <workItem from=\"1731600649727\" duration=\"7476000\" />\r\n      <workItem from=\"1731613045571\" duration=\"618000\" />\r\n      <workItem from=\"1731619345185\" duration=\"5769000\" />\r\n      <workItem from=\"1731681652962\" duration=\"1023000\" />\r\n      <workItem from=\"1731692307160\" duration=\"1600000\" />\r\n      <workItem from=\"1731700213910\" duration=\"1170000\" />\r\n      <workItem from=\"1731704723577\" duration=\"6000\" />\r\n      <workItem from=\"1731767130218\" duration=\"114000\" />\r\n      <workItem from=\"1731774381264\" duration=\"449000\" />\r\n      <workItem from=\"1732099951019\" duration=\"259000\" />\r\n      <workItem from=\"1732620212957\" duration=\"439000\" />\r\n      <workItem from=\"1732622429826\" duration=\"466000\" />\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"com.intellij.coverage.CoverageDataManagerImpl\">\r\n    <SUITE FILE_PATH=\"coverage/Cde1_1Da$Sb_Test.coverage\" NAME=\"Sb Test Coverage Results\" MODIFIED=\"1730379651074\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$/GITLAB\" />\r\n    <SUITE FILE_PATH=\"coverage/Cde1_1Da$clean_code.coverage\" NAME=\"clean_code Coverage Results\" MODIFIED=\"1732622528388\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$/GITLAB\" />\r\n    <SUITE FILE_PATH=\"coverage/Cde1_1Da$Sebi_Tests.coverage\" NAME=\"Sebi Tests Coverage Results\" MODIFIED=\"1730804440774\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$/GITLAB\" />\r\n    <SUITE FILE_PATH=\"coverage/Cde1_1Da$Ale_Test2plot.coverage\" NAME=\"Ale_Test2plot Coverage Results\" MODIFIED=\"1731624717324\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$/GITLAB\" />\r\n    <SUITE FILE_PATH=\"coverage/Cde1_1Da$Sebi_demo2.coverage\" NAME=\"Sebi demo2 Coverage Results\" MODIFIED=\"1731681989312\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$/GITLAB\" />\r\n    <SUITE FILE_PATH=\"coverage/Cde1_1Da$Test1.coverage\" NAME=\"Test1 Coverage Results\" MODIFIED=\"1729758027122\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$/GITLAB\" />\r\n    <SUITE FILE_PATH=\"coverage/Cde1_1Da$Sebi_Test_code1.coverage\" NAME=\"Sebi_Test_code1 Coverage Results\" MODIFIED=\"1732622715989\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$/GITLAB\" />\r\n    <SUITE FILE_PATH=\"coverage/Cde1_1Da$Sebi_demo.coverage\" NAME=\"Sebi demo Coverage Results\" MODIFIED=\"1731414173900\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$/GITLAB\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision d299e1c311b37a379bb45ad0307d84e9de29ea2e)
++++ b/.idea/workspace.xml	(date 1732630288993)
+@@ -4,9 +4,11 @@
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="2f45e764-2d27-49bd-b526-0261b1dc8361" name="Changes" comment="">
++    <list default="true" id="2f45e764-2d27-49bd-b526-0261b1dc8361" name="Changes" comment="# Tests">
++      <change beforePath="$PROJECT_DIR$/.idea/Cde1-1Da.iml" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/GITLAB/Sebi_Test_code1.py" beforeDir="false" afterPath="$PROJECT_DIR$/GITLAB/Sebi_Test_code1.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/GITLAB/Andres_Test.py" beforeDir="false" afterPath="$PROJECT_DIR$/GITLAB/Andres_Test.py" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -22,6 +24,7 @@
+   </component>
+   <component name="Git.Settings">
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
++    <option name="UPDATE_TYPE" value="REBASE" />
+   </component>
+   <component name="GitHubPullRequestSearchHistory">{
+   &quot;lastFilter&quot;: {
+@@ -32,7 +35,7 @@
+   <component name="GithubPullRequestsUISettings">{
+   &quot;selectedUrlAndAccountId&quot;: {
+     &quot;url&quot;: &quot;https://github.com/NotSchebs/Cde1-1Da.git&quot;,
+-    &quot;accountId&quot;: &quot;c42c0b89-a55b-4090-a22e-470f110cf85d&quot;
++    &quot;accountId&quot;: &quot;f63d3946-69d3-4221-9d30-2d1559ba671c&quot;
+   }
+ }</component>
+   <component name="HighlightingSettingsPerFile">
+@@ -46,30 +49,39 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent">{
+-  &quot;keyToString&quot;: {
+-    &quot;Python.Ale_Test2plot.executor&quot;: &quot;Run&quot;,
+-    &quot;Python.Sebi Tests.executor&quot;: &quot;Run&quot;,
+-    &quot;Python.Sebi demo.executor&quot;: &quot;Run&quot;,
+-    &quot;Python.Sebi demo2.executor&quot;: &quot;Run&quot;,
+-    &quot;Python.Sebi_Test_code1.executor&quot;: &quot;Run&quot;,
+-    &quot;Python.Test1.executor&quot;: &quot;Run&quot;,
+-    &quot;Python.clean_code.executor&quot;: &quot;Run&quot;,
+-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
++  <component name="PropertiesComponent"><![CDATA[{
++  "keyToString": {
++    "Python.Ale_Test2plot.executor": "Run",
++    "Python.Andres_Test.executor": "Debug",
++    "Python.Andres_Test2.executor": "Run",
++    "Python.Andres_tkinter.executor": "Run",
++    "Python.Sebi Tests.executor": "Run",
++    "Python.Sebi demo.executor": "Run",
++    "Python.Sebi demo2.executor": "Run",
++    "Python.Sebi_Test_code1.executor": "Run",
++    "Python.Test1.executor": "Run",
++    "Python.clean_code.executor": "Run",
++    "RunOnceActivity.ShowReadmeOnStart": "true",
++    "git-widget-placeholder": "main",
++    "ignore.virus.scanning.warn.message": "true",
++    "last_opened_file_path": "C:/Users/blemi/Documents/GitHub/Cde1-1Da/GITLAB",
++    "node.js.detected.package.eslint": "true",
++    "node.js.selected.package.eslint": "(autodetect)",
++    "node.js.selected.package.tslint": "(autodetect)",
++    "nodejs_package_manager_path": "npm",
++    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
++    "vue.rearranger.settings.migration": "true"
+   }
+-}</component>
++}]]></component>
++  <component name="RecentsManager">
++    <key name="CopyFile.RECENT_KEYS">
++      <recent name="C:\Users\blemi\Documents\GitHub\Cde1-1Da\GITLAB" />
++    </key>
++  </component>
+   <component name="SharedIndexes">
+     <attachedChunks>
+       <set>
+-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-PY-242.23339.19" />
+-        <option value="bundled-python-sdk-0029f7779945-399fe30bd8c1-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-242.23339.19" />
++        <option value="bundled-python-sdk-0e3be3396995-c546a90a8094-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-242.23339.19" />
+       </set>
+     </attachedChunks>
+   </component>
+@@ -106,10 +118,32 @@
+       <workItem from="1732620212957" duration="439000" />
+       <workItem from="1732622429826" duration="466000" />
+     </task>
++    <task id="LOCAL-00001" summary="#">
++      <option name="closed" value="true" />
++      <created>1732626185129</created>
++      <option name="number" value="00001" />
++      <option name="presentableId" value="LOCAL-00001" />
++      <option name="project" value="LOCAL" />
++      <updated>1732626185129</updated>
++    </task>
++    <task id="LOCAL-00002" summary="# Tests">
++      <option name="closed" value="true" />
++      <created>1732630261595</created>
++      <option name="number" value="00002" />
++      <option name="presentableId" value="LOCAL-00002" />
++      <option name="project" value="LOCAL" />
++      <updated>1732630261595</updated>
++    </task>
++    <option name="localTasksCounter" value="3" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+     <option name="version" value="3" />
++  </component>
++  <component name="VcsManagerConfiguration">
++    <MESSAGE value="#" />
++    <MESSAGE value="# Tests" />
++    <option name="LAST_COMMIT_MESSAGE" value="# Tests" />
+   </component>
+   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+     <SUITE FILE_PATH="coverage/Cde1_1Da$Sb_Test.coverage" NAME="Sb Test Coverage Results" MODIFIED="1730379651074" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/GITLAB" />
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"Black\">\r\n    <option name=\"sdkName\" value=\"Python 3.8\" />\r\n  </component>\r\n  <component name=\"ProjectRootManager\" version=\"2\" project-jdk-name=\"Python 3.8\" project-jdk-type=\"Python SDK\" />\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 0e05793876ab5e193ff54c62a6d5e28b14c0390f)
++++ b/.idea/misc.xml	(date 1732628755922)
+@@ -3,5 +3,5 @@
+   <component name="Black">
+     <option name="sdkName" value="Python 3.8" />
+   </component>
+-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.8" project-jdk-type="Python SDK" />
++  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.8 (2)" project-jdk-type="Python SDK" />
+ </project>
+\ No newline at end of file
