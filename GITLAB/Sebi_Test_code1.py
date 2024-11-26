@@ -42,7 +42,7 @@ class RouteData:
     @staticmethod
     def fetch_data(url):
         """Request data from a URL and return as plain text"""
-        response = requests.get(url)
+        response = requests.get(url, verify=False) # to ignore insecure website
         return response.text
 
     def parse_data(self):
@@ -57,7 +57,7 @@ class RouteData:
             values = line.split(',')
             if len(values) == 5:
                 _, latitude, longitude, temperature, humidity = values
-                if (latitude, longitude, temperature) in coordinates:
+                if ((latitude, longitude, temperature)) in coordinates:
                     continue
                 coordinates.append((float(latitude), float(longitude), float(temperature)))
                 humidity_data.append((float(latitude), float(longitude), int(humidity)))
@@ -99,7 +99,10 @@ class RouteSelector:
         if selected_option == "Custom Map URL":  # selected option
             selected_label = "Custom Map URL"  # label
             selected_option = custom_entry.get()
-            if not self.is_valid_url(selected_option):  # Check if it's a valid URL
+            if self.is_valid_url(selected_option):
+                self.selected_url = selected_option
+                popup.destroy()  # Close the window after selection
+            elif not self.is_valid_url(selected_option):  # Check if it's a valid URL
                 messagebox.showwarning("Invalid URL", "Please enter a valid URL.")
 
         elif selected_option:
