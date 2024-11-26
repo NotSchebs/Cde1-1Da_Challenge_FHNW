@@ -1,11 +1,12 @@
 import tkinter as tk
+
 from tkinter import messagebox, ttk
 import re
 import tkintermapview
 import requests
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-from shapely.creation import empty
+
 
 #fruit thing
 
