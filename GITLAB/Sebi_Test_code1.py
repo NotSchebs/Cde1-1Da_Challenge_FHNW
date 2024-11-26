@@ -57,7 +57,7 @@ class RouteData:
             values = line.split(',')
             if len(values) == 5:
                 _, latitude, longitude, temperature, humidity = values
-                if ((latitude, longitude, temperature)) in coordinates:
+                if (float(latitude), float(longitude), float(temperature)) in coordinates:
                     continue
                 coordinates.append((float(latitude), float(longitude), float(temperature)))
                 humidity_data.append((float(latitude), float(longitude), int(humidity)))
