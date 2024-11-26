@@ -235,7 +235,7 @@ if __name__ == "__main__":
 
             beschriftung = f"{start}°C - {end}°C" if isinstance(start, int) else f"{start}"
 
-            farb_label = ttk.Label(frame, text=beschriftung, background=farbe, width=20)
+            farb_label = tk.Label(frame, text=beschriftung, background=farbe, width=20)
             farb_label.pack(side="left", padx=10)
             frame.pack(side="top", fill="x", pady=5)
 
