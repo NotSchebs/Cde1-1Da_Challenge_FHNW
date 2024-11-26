@@ -258,7 +258,6 @@ if __name__ == "__main__":
 
     """erstelle_legende()"""
 
-
     # Implementieren der Daten (Raumtemperatur(temp)) und (Luftfeuchtigkeit(LF))
     #Für die X achse wird die Anzahl werte von der Raumtemperatur genommen da sie gleich viele werte hat wie die Luftfeuchtigkeit
     x = list(range(len(temp)))
