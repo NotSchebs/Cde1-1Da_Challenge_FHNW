@@ -1,12 +1,12 @@
 import tkinter as tk
-
 from tkinter import messagebox, ttk
 import re
 import tkintermapview
 import requests
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-
+import matplotlib
+matplotlib.use('Agg')  # For non-interactive plotting
 
 #fruit thing
 
@@ -43,7 +43,7 @@ class RouteData:
     @staticmethod
     def fetch_data(url):
         """Request data from a URL and return as plain text"""
-        response = requests.get(url, verify=False)
+        response = requests.get(url, verify=False) # to ignore insecure website
         return response.text
 
     def parse_data(self):
@@ -58,7 +58,7 @@ class RouteData:
             values = line.split(',')
             if len(values) == 5:
                 _, latitude, longitude, temperature, humidity = values
-                if (latitude, longitude, temperature) in coordinates:
+                if (float(latitude), float(longitude), float(temperature)) in coordinates:
                     continue
                 coordinates.append((float(latitude), float(longitude), float(temperature)))
                 humidity_data.append((float(latitude), float(longitude), int(humidity)))
@@ -93,20 +93,25 @@ class RouteSelector:
         )
         return re.match(url_regex, url) is not None
 
-    def submit_selection(self,var, popup, label, custom_entry):
+    def submit_selection(self,var, popup, custom_entry):
         """Handle the submission of the selected option or custom URL."""
         selected_option = var.get()
-        selected_label = label
-        if selected_option == "Custom Map URL":  # selected option
-            selected_label = "Custom Map URL"  # label
-            selected_option = custom_entry.get()
-            if not self.is_valid_url(selected_option):  # Check if it's a valid URL
+
+        # Handle the case for the custom map URL
+        if selected_option == "Custom Map URL":
+            custom_url = custom_entry.get()  # Get custom URL from entry field
+            if self.is_valid_url(custom_url):
+                self.selected_url = custom_url
+                popup.destroy()  # Close the window after selection
+            else:
                 messagebox.showwarning("Invalid URL", "Please enter a valid URL.")
 
         elif selected_option:
-            messagebox.showinfo("Selection", f"You selected: {selected_label}")
+            label = next(label for label, url in self.options if url == selected_option)
+            messagebox.showinfo("Selection", f"You selected: {label}")
             self.selected_url = selected_option
             popup.destroy()  # Close the window after selection
+
         else:
             messagebox.showwarning("No selection", "Please select an option.")
 
@@ -123,6 +128,7 @@ class RouteSelector:
         for label, url in self.options:
             radio_button = tk.Radiobutton(popup, text=label, variable=var, value=url).pack(anchor="w")
 
+
         # Add a radio button for the "Other" option
         other_radio_button = tk.Radiobutton(popup, text="Custom Map URL", variable=var, value="Custom Map URL").pack(anchor="w")
 
@@ -132,7 +138,7 @@ class RouteSelector:
 
         # Submit button to confirm selection
         submit_button = tk.Button(popup, text="Submit",
-                                  command=lambda: self.submit_selection(var, popup, label, custom_entry))
+                                  command=lambda: self.submit_selection(var, popup, custom_entry))
         submit_button.pack(pady=20)
 
         popup.wait_window()  # Wait for the popup window to close
