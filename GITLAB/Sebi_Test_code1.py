@@ -73,7 +73,7 @@ class RouteSelector:
 
         self.default_options = [
             ('Route Map demo1',
-             'https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo1?start=0&end=-1&format=csv'),
+             'https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo?start=0&end=-1&format=csv'),
             ('Route Map demo2',
              'https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo2_extremvieledaten?start=0&end=-1&format=csv')
         ]
