@@ -1,5 +1,4 @@
 import tkinter as tk
-from enum import verify
 from tkinter import messagebox, ttk
 import re
 import tkintermapview
