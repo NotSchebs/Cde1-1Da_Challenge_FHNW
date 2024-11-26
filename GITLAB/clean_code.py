@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from tkinter import ttk
 
+
 #fruit thing
 
 class MapApp:
@@ -221,7 +222,7 @@ def erstelle_legende():
     ]
 
     for (start, end) in temperaturbereiche:
-        frame = ttk.Frame(popup2)
+        frame = tk.Frame(popup2)
         farbe = RouteVisualizer.get_color((start if isinstance(start, int) else end - 10))
 
         beschriftung = f"{start}°C - {end}°C" if isinstance(start, int) else f"{start}"
