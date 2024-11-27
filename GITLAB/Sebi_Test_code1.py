@@ -206,8 +206,6 @@ class RouteVisualizer:
         self.add_markers()
         self.draw_paths()
 
-################################
-
 # Funktion, um die Legende zu erstellen
 def erstelle_legende():
     popup2 = tk.Toplevel()  # Use Toplevel for non-blocking window
@@ -236,7 +234,6 @@ def erstelle_legende():
 
     popup2.mainloop()  # Start the Tkinter loop for the legend popup
 
-    ################################
 # Main Execution
 if __name__ == "__main__":
 
