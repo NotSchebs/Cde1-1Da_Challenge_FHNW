@@ -6,6 +6,7 @@ import requests
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from tkinter import ttk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
 #fruit thing
@@ -232,31 +233,14 @@ def erstelle_legende():
     schliessen_button = ttk.Button(popup2, text="Schließen", command=popup2.destroy)
     schliessen_button.pack(side="top", pady=10)
 
-    popup2.mainloop()  # Start the Tkinter loop for the legend popup
+    # popup2.mainloop()  # Start the Tkinter loop for the legend popup
 
-# Main Execution
-if __name__ == "__main__":
-
-    #create Map selection popup
-    selector = RouteSelector()
-    selected_url = selector.map_options()
-    print("Selected URL:", selected_url)
-
-
-
-    # Initialize Map Application
-    app = MapApp()
-
-    # Fetch route data
-    route_url = selected_url
-    route_data = RouteData(route_url)
-    coordinates, humidity_data, temp, LF = route_data.parse_data()
-
-    # Visualize route
-    visualizer = RouteVisualizer(app, coordinates, humidity_data)
-    visualizer.visualize()
-
-
+def plot_popup(temp, LF):
+    """Display the temperature and humidity plot in a Tkinter popup."""
+    # Create a popup window
+    popup3 = tk.Toplevel()
+    popup3.title("Temperature and Humidity Plot")
+    popup3.geometry("800x600")  # Adjust the size of the popup
 
     # Implementieren der Daten (Raumtemperatur(temp)) und (Luftfeuchtigkeit(LF))
     #Für die X achse wird die Anzahl werte von der Raumtemperatur genommen da sie gleich viele werte hat wie die Luftfeuchtigkeit
@@ -265,7 +249,7 @@ if __name__ == "__main__":
     y2 = LF
 
     # Neues Figure- und Axes-Objekt erstellen
-    fig, ax1 = plt.subplots()
+    fig, ax1 = plt.subplots(figsize=(10, 10))
 
     # Zweites Axes erstellen, das dieselbe x-Achse teilt
     ax2 = ax1.twinx()
@@ -286,8 +270,39 @@ if __name__ == "__main__":
     ax1.xaxis.set_major_locator(ticker.MultipleLocator((len(x)-1) / 10))
     ax1.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(round(x / (len(temp) - 1) * 100))}%'))
 
+    # Embed the Matplotlib figure into the Tkinter popup
+    canvas = FigureCanvasTkAgg(fig, master=popup3)
+    canvas.draw()
+    canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+    # Add a close button
+    close_button = ttk.Button(popup3, text="Close", command=popup3.destroy)
+    close_button.pack(pady=10)
+
+    # popup3.mainloop()
+
+# Main Execution
+if __name__ == "__main__":
+
+    #create Map selection popup
+    selector = RouteSelector()
+    selected_url = selector.map_options()
+    print("Selected URL:", selected_url)
+
+    # Initialize Map Application
+    app = MapApp()
+
+    # Fetch route data
+    route_url = selected_url
+    route_data = RouteData(route_url)
+    coordinates, humidity_data, temp, LF = route_data.parse_data()
+
+    # Visualize route
+    visualizer = RouteVisualizer(app, coordinates, humidity_data)
+    visualizer.visualize()
+
     # Abbildung anzeigen
-    plt.show()
+    plot_popup(temp, LF)
     erstelle_legende()
     # Run the Tkinter app
     app.run()
