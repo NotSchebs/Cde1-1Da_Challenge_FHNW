@@ -6,8 +6,8 @@ import requests
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib
-matplotlib.use('Agg')  # For non-interactive plotting
-
+matplotlib.use('Agg')  # Somehow fixes the map, but popup doesn't work anymore
+# matplotlib into tkinter!!!!!!!!!!!!
 #fruit thing
 
 class MapApp:
