@@ -1,24 +1,19 @@
-'''import paho.mqtt.client as mqtt
-import time
 
-# Konfiguration
+import time
+import paho.mqtt.client as mqtt
+import csv
+import requests  # Für das Abrufen der Datei von einer URL
+
+# MQTT Broker Konfiguration
 BROKER_URL = "fl-17-240.zhdk.cloud.switch.ch"
 BROKER_PORT = 9001  # WebSocket-Port
-TRANSPORT = "websockets"  # WebSocket als Transportprotokoll
-TOPIC_TEMPLATE = "{company}/{container}/{route}"  # Topic-Vorlage
-UPDATE_INTERVAL = 5  # Zeitintervall zwischen Updates in Sekunden
+TOPIC = "migros/grp2/demo1"  # Das zu abonnierende Topic
 
-# Transport-Details
-company = "migros"  # Firma
-container = "grp2"  # Container
-routes = ["demo1", "demo2_extremvieledaten", "demo"]  # Routen
-
-# Beispieldaten für Live-Updates
-updates = [
-    {"timestamp": "2024-12-10T10:00:00", "status": "on route", "location": "Point A"},
-    {"timestamp": "2024-12-10T10:15:00", "status": "delayed", "location": "Point B"},
-    {"timestamp": "2024-12-10T10:30:00", "status": "arrived", "location": "Point C"},
-]
+# Funktion, um die CSV-Datei von einer URL zu laden
+def load_csv_from_url(url):
+    response = requests.get(url)
+    response.raise_for_status()  # Falls die Anfrage fehlschlägt, wird eine Ausnahme ausgelöst
+    return response.text  # Gibt den Inhalt der CSV als Text zurück
 
 # Callback-Funktion für den Verbindungsaufbau
 def on_connect(client, userdata, flags, rc):
@@ -27,90 +22,42 @@ def on_connect(client, userdata, flags, rc):
     else:
         print(f"Verbindung fehlgeschlagen mit Fehlercode {rc}")
 
+# Funktion, um die CSV-Datei Zeile für Zeile zu publizieren
+def publish_csv_lines(client, csv_content):
+    # CSV-Inhalt im Textformat lesen
+    csv_reader = csv.reader(csv_content.splitlines())
+    for row in csv_reader:
+        # Jede Zeile wird als Nachricht veröffentlicht
+        payload = ', '.join(row)  # Konvertiere die Zeile in einen String
+        client.publish(TOPIC, payload)
+        print(f"Gesendet: {payload} an {TOPIC}")
+        time.sleep(0.1)  # Verzögerung von 0,1 Sekunden
+
 # MQTT-Client initialisieren
-client = mqtt.Client(transport=TRANSPORT)
+client = mqtt.Client(transport="websockets")  # WebSocket als Transportprotokoll
+client.on_connect = on_connect  # Callback für Verbindungsaufbau
 
-# Callback setzen
-client.on_connect = on_connect
-
-# Verbindung zum Broker herstellen
 try:
-    client.connect(BROKER_URL, BROKER_PORT, 60)
+    # Verbindung zum MQTT Broker herstellen
     print("Verbindung wird aufgebaut...")
-    client.loop_start()  # Netzwerk-Loop starten
+    client.connect(BROKER_URL, BROKER_PORT, 60)
+    client.loop_start()  # Startet den MQTT-Loop, um Nachrichten zu empfangen
 
-    # Live-Updates an alle Topics senden
-    for route in routes:
-        topic = TOPIC_TEMPLATE.format(company=company, container=container, route=route)
-        print(f"Publizieren von Updates für Topic: {topic}")
-        for update in updates:
-            payload = f"{update['timestamp']}, {update['status']}, {update['location']}"
-            client.publish(topic, payload)
-            print(f"Gesendet: {payload} an {topic}")
-            time.sleep(UPDATE_INTERVAL)  # Wartezeit zwischen Updates
+    # CSV-Datei von der URL laden
+    print("Lade CSV-Datei...")
+    csv_content = load_csv_from_url("https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo1?start=0&end=-1&format=csv")  #https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo1/info
+    print("CSV-Datei erfolgreich geladen.")
 
-    client.loop_stop()
-    client.disconnect()
+    # Jede Zeile der CSV-Datei über MQTT veröffentlichen
+    print("Starte Ausgabe der CSV-Zeilen...")
+    publish_csv_lines(client, csv_content)
+
+    # MQTT-Loop stoppen und Verbindung trennen
+    client.loop_stop()  # Stoppt den Loop
+    client.disconnect()  # Trennt die Verbindung
     print("Verbindung beendet.")
+
+except requests.exceptions.RequestException as e:
+    print(f"Fehler beim Abrufen der Datei: {e}")
 except Exception as e:
-    print(f"Fehler beim Verbindungsaufbau oder Senden: {e}")
-
-'''
-import asyncio
-import websockets
-import paho.mqtt.client as mqtt
-
-# WebSocket-Server
-BROKER_URL = "wss://fl-17-240.zhdk.cloud.switch.ch:9001"  # Sicherstellen, dass es der WebSocket-URL ist
-BROKER_PORT = 9001
-
-
-async def connect_mqtt():
-    # Erstelle einen MQTT-Client
-    client = mqtt.Client()
-
-    # Callback für den Verbindungsaufbau
-    def on_connect(client, userdata, flags, rc):
-        if rc == 0:
-            print("Verbindung erfolgreich!")
-        else:
-            print(f"Verbindung fehlgeschlagen mit Fehlercode {rc}")
-
-    # Callback für eingehende Nachrichten
-    def on_message(client, userdata, msg):
-        print(f"Neue Nachricht empfangen von {msg.topic}")
-        payload = msg.payload.decode()
-        print(f"Nachricht: {payload}")
-
-    # Callback zuweisen
-    client.on_connect = on_connect
-    client.on_message = on_message
-
-    # Stelle eine Verbindung zum Broker über WebSockets her
-    async with websockets.connect(BROKER_URL) as websocket:
-        print("Verbunden mit WebSocket")
-
-        # MQTT-Verbindung zu WebSocket aufbauen
-        client.connect(BROKER_URL, BROKER_PORT, 60)
-
-        # Start der Nachrichtenschleife
-        client.loop_start()
-
-        # Abonnieren des gewünschten Topics
-        client.subscribe("migros/grp2/demo1")
-        client.subscribe("migros/grp2/demo2_extremvieledaten")
-        client.subscribe("migros/grp2/demo")
-
-        # Blockiert bis zum Empfang von Nachrichten
-        print("Warte auf Nachrichten...")
-        client.loop_forever()
-
-
-# Starte die asynchrone Verbindung
-asyncio.get_event_loop().run_until_complete(connect_mqtt())
-
-
-
-
-
-
+    print(f"Fehler: {e}")
