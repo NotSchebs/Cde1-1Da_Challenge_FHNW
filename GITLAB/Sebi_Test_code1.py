@@ -8,8 +8,6 @@ import matplotlib.ticker as ticker
 from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-
-
 #fruit thing
 
 class MapApp:
