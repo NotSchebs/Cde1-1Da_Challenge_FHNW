@@ -1,3 +1,4 @@
+import time
 import tkinter as tk
 from tkinter import messagebox
 import re
@@ -255,6 +256,7 @@ class RouteVisualizer:
         if self.coordinates:
             start_lat, start_lon, _ = self.coordinates[0]
             end_lat, end_lon, _ = self.coordinates[-1]
+
 
             # Starting and destination markers
             self.map_app.add_marker(start_lat, start_lon, f'Starting point! Humidity: {self.humidity_data[0][2]}%')
