@@ -69,10 +69,6 @@ class RouteData:
 
         return coordinates, humidity_data , temp, LF
 
-import tkinter as tk
-from tkinter import messagebox
-import re
-
 class RouteSelector:
     def __init__(self, options=None):
         """Initialize the selector with route options.
@@ -224,8 +220,6 @@ class RouteSelector:
             return None
 
         return self.selected_url
-
-
 
 class RouteVisualizer:
     def __init__(self, map_app, coordinates, humidity_data):
