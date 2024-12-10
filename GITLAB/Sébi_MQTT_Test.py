@@ -50,23 +50,23 @@ class RouteData:
     def parse_data(self):
         """Parse the CSV route data into a list of (lat, lon, temperature, humidity) tuples"""
         lines = self.data.strip().split('\n')
-        coordinates = []
-        humidity_data = []
-        temp = []
-        LF = []
+        coord = []
+        hum_dat = []
+        tem = []
+        lf = []
 
         for line in lines:
             values = line.split(',')
             if len(values) == 5:
                 _, latitude, longitude, temperature, humidity = values
-                if (float(latitude), float(longitude), float(temperature)) in coordinates:
+                if (float(latitude), float(longitude), float(temperature)) in coord:
                     continue
-                coordinates.append((float(latitude), float(longitude), float(temperature)))
-                humidity_data.append((float(latitude), float(longitude), int(humidity)))
-                temp.append(float(temperature))
-                LF.append(float(humidity))
+                coord.append((float(latitude), float(longitude), float(temperature)))
+                hum_dat.append((float(latitude), float(longitude), int(humidity)))
+                tem.append(float(temperature))
+                lf.append(float(humidity))
 
-        return coordinates, humidity_data , temp, LF
+        return coord, hum_dat , tem, lf
 
 class RouteSelector:
     def __init__(self, options = None):
@@ -127,11 +127,11 @@ class RouteSelector:
         var = tk.StringVar(value="")
 
         for label, url in self.options:
-            radio_button = tk.Radiobutton(popup, text=label, variable=var, value=url).pack(anchor="w")
+            tk.Radiobutton(popup, text=label, variable=var, value=url).pack(anchor="w")
 
 
         # Add a radio button for the "Other" option
-        other_radio_button = tk.Radiobutton(popup, text="Custom Map URL", variable=var, value="Custom Map URL").pack(anchor="w")
+        tk.Radiobutton(popup, text="Custom Map URL", variable=var, value="Custom Map URL").pack(anchor="w")
 
         # Entry box for custom input (always visible)
         custom_entry = tk.Entry(popup)
@@ -147,11 +147,11 @@ class RouteSelector:
         return self.selected_url  # Return the selected URL after the window is closed
 
 class RouteVisualizer:
-    def __init__(self, map_app, coordinates, humidity_data):
+    def __init__(self, map_app, coord, hum_data):
         """Initialize with a MapApp instance and route data"""
         self.map_app = map_app
-        self.coordinates = coordinates
-        self.humidity_data = humidity_data
+        self.coordinates = coord
+        self.humidity_data = hum_data
 
     @staticmethod
     def get_color(temperature):
@@ -235,7 +235,7 @@ def erstelle_legende():
 
     # popup2.mainloop()  # Start the Tkinter loop for the legend popup
 
-def plot_popup(temp, LF):
+def plot_popup(tem, lf):
     """Display the temperature and humidity plot in a Tkinter popup."""
     # Create a popup window
     popup3 = tk.Toplevel()
@@ -244,9 +244,9 @@ def plot_popup(temp, LF):
 
     # Implementieren der Daten (Raumtemperatur(temp)) und (Luftfeuchtigkeit(LF))
     #Für die X achse wird die Anzahl werte von der Raumtemperatur genommen da sie gleich viele werte hat wie die Luftfeuchtigkeit
-    x = list(range(len(temp)))
-    y1 = temp
-    y2 = LF
+    x = list(range(len(tem)))
+    y1 = tem
+    y2 = lf
 
     # Neues Figure- und Axes-Objekt erstellen
     fig, ax1 = plt.subplots(figsize=(10, 10))
@@ -268,7 +268,7 @@ def plot_popup(temp, LF):
     #X-Achsen-Beschriftungen in Prozent festlegen
     ax1.set_xlim(0, len(x) - 1)
     ax1.xaxis.set_major_locator(ticker.MultipleLocator((len(x)-1) / 10))
-    ax1.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(round(x / (len(temp) - 1) * 100))}%'))
+    ax1.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(round(x / (len(tem) - 1) * 100))}%'))
 
     # Embed the Matplotlib figure into the Tkinter popup
     canvas = FigureCanvasTkAgg(fig, master=popup3)
