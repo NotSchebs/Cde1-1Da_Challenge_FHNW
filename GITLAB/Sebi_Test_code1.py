@@ -2,6 +2,8 @@ import time
 import tkinter as tk
 from tkinter import messagebox
 import re
+import threading
+import random
 import tkintermapview
 import requests
 import matplotlib.pyplot as plt
@@ -9,7 +11,6 @@ import matplotlib.ticker as ticker
 from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-#fruit thing
 
 class MapApp:
     def __init__(self, width=1200, height=1000, title="Map Viewer"):
@@ -36,9 +37,26 @@ class MapApp:
         """Start the Tkinter main loop"""
         self.root.mainloop()
 
+class RealTimeDataSimulator:
+    def __init__(self, data, delay=0.05):
+        """
+        Simulate real-time data streaming.
+        :param data: Full list of route data to simulate incoming data.
+        :param delay: Delay between each data chunk (in seconds).
+        """
+        self.data = data
+        self.delay = delay
+
+    def datastream(self):
+        """Generator that simulates data being sent in chunks."""
+        for i in range(1, len(self.data) + 1):
+            yield self.data[:i]  # Yield a subset of the data
+            time.sleep(self.delay)  # Simulate delay for real-time effect
+
 class RouteData:
     def __init__(self, url):
         """Fetch and store route data from a given URL"""
+        self.url = url
         self.data = self.fetch_data(url)
 
     @staticmethod
@@ -49,24 +67,25 @@ class RouteData:
 
     def parse_data(self):
         """Parse the CSV route data into a list of (lat, lon, temperature, humidity) tuples"""
-        lines = self.data.strip().split('\n')
-        coordinates = []
-        humidity_data = []
-        temp = []
-        LF = []
+        lines = self.data.strip().split("\n")
+        parsed_data = []
 
         for line in lines:
             values = line.split(',')
-            if len(values) == 5:
-                _, latitude, longitude, temperature, humidity = values
-                if (float(latitude), float(longitude), float(temperature)) in coordinates:
-                    continue
-                coordinates.append((float(latitude), float(longitude), float(temperature)))
-                humidity_data.append((float(latitude), float(longitude), int(humidity)))
-                temp.append(float(temperature))
-                LF.append(float(humidity))
+            if len(values) >= 5:  # Ensure there are at least 5 elements
+                try:
+                    lat = float(values[1])
+                    lon = float(values[2])
+                    temp = float(values[3])
+                    humidity = int(values[4])
+                    parsed_data.append((lat, lon, temp, humidity))
+                except ValueError:
+                    # Skip invalid lines that cannot be converted properly
+                    print(f"Skipping invalid line: {line}")
+            else:
+                print(f"Skipping incomplete line: {line}")
 
-        return coordinates, humidity_data , temp, LF
+        return parsed_data
 
 class RouteSelector:
     def __init__(self, options=None):
@@ -226,6 +245,46 @@ class RouteVisualizer:
         self.map_app = map_app
         self.coordinates = coordinates
         self.humidity_data = humidity_data
+        self.markers = []  # Keep track of markers
+        self.markers_track = []  # Track visited points
+        self.hum_record = []  # Keep track of humidity changes
+        self.visited_points = set()  # Set to track unique coordinates
+        self.start_point_added = False  # Flag to track if the start point is added
+
+    def update_markers_and_paths(self, new_coordinates, humidity_data):
+        """Update the map with new coordinates dynamically."""
+
+        for i, (lat, lon, temp, humidity) in enumerate(new_coordinates):
+            current_point = (lat, lon)
+
+            # Skip the point if it has been visited already (don't reprocess it)
+            if current_point in self.visited_points:
+                continue
+
+            # Mark the point as visited
+            self.visited_points.add(current_point)
+
+            # Add marker for the first point (start)
+            if i == 0 and not self.start_point_added:
+                self.map_app.add_marker(lat, lon, f"Start: {humidity}%")
+                self.map_app.set_initial_position(lat, lon, zoom=10)  # Set map view on start point
+                self.markers_track.append(current_point)
+                self.hum_record.append(humidity)
+                self.start_point_added = True  # Mark the start point added
+
+            # Add a marker when humidity changes (only if it changed from the previous)
+            elif i > 0 and humidity != self.hum_record[-1]:
+                self.map_app.add_marker(lat, lon, f"Humidity: {humidity}%")
+                self.map_app.set_initial_position(lat, lon, zoom=10)
+                self.hum_record.append(humidity)
+
+            # Draw path between consecutive coordinates
+            if i > 0:
+                prev_lat, prev_lon, _, _ = new_coordinates[i - 1]
+                self.map_app.add_path([(prev_lat, prev_lon), (lat, lon)], color=self.get_color(temp))
+
+            # Always track this point for the path history
+            self.markers_track.append(current_point)
 
     @staticmethod
     def get_color(temperature):
@@ -251,36 +310,46 @@ class RouteVisualizer:
         else:
             return 'red'
 
-    def add_markers(self):
-        """Add starting, destination, and humidity markers"""
-        if self.coordinates:
-            start_lat, start_lon, _ = self.coordinates[0]
-            end_lat, end_lon, _ = self.coordinates[-1]
+class Plot:
+    def __init__(self, temp_data, humidity_data):
+        self.temp_data = temp_data
+        self.humidity_data = humidity_data
+        self.x = list(range(len(temp_data)))
+        self.fig, self.ax1 = plt.subplots(figsize=(6, 4))
+        self.ax2 = self.ax1.twinx()
+        self.canvas = None
 
+    def initialize_plot(self, parent):
+        """Create the popup window for the plot."""
+        self.popup = tk.Toplevel(parent)
+        self.popup.title("Temperature and Humidity Plot")
 
-            # Starting and destination markers
-            self.map_app.add_marker(start_lat, start_lon, f'Starting point! Humidity: {self.humidity_data[0][2]}%')
-            self.map_app.add_marker(end_lat, end_lon, f'Destination! Humidity: {self.humidity_data[-1][2]}%')
-            self.map_app.set_initial_position(start_lat, start_lon, zoom=10)
+        self.line_temp, = self.ax1.plot(self.x, self.temp_data, 'b-', label='Temperature')
+        self.line_humidity, = self.ax2.plot(self.x, self.humidity_data, 'r-', label='Humidity')
 
-            # Humidity markers
-            for i in range(len(self.humidity_data) - 1):
-                if self.humidity_data[i][2] != self.humidity_data[i + 1][2]:
-                    lat, lon, humidity = self.humidity_data[i + 1]
-                    self.map_app.add_marker(lat, lon, f'Humidity: {humidity}%')
+        self.ax1.set_xlabel("Steps")
+        self.ax1.set_ylabel("Temperature", color='b')
+        self.ax2.set_ylabel("Humidity", color='r')
 
-    def draw_paths(self):
-        """Draw paths between coordinates with color indicating temperature"""
-        for i in range(1, len(self.coordinates)):
-            lat1, lon1, temp1 = self.coordinates[i - 1]
-            lat2, lon2, temp2 = self.coordinates[i]
-            color = self.get_color(temp1)
-            self.map_app.add_path([(lat1, lon1), (lat2, lon2)], color=color)
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.popup)
+        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        self.canvas.draw()
 
-    def visualize(self):
-        """Run visualization by adding markers and drawing paths"""
-        self.add_markers()
-        self.draw_paths()
+    def update_plot(self, new_temp, new_humidity):
+        """Update the plot with new data."""
+        self.temp_data = new_temp
+        self.humidity_data = new_humidity
+        self.x = list(range(len(new_temp)))
+
+        self.line_temp.set_data(self.x, self.temp_data)
+        self.line_humidity.set_data(self.x, self.humidity_data)
+
+        self.ax1.relim()
+        self.ax1.autoscale_view()
+        self.ax2.relim()
+        self.ax2.autoscale_view()
+
+        self.canvas.draw()
 
 # Funktion, um die Legende zu erstellen
 def erstelle_legende():
@@ -310,51 +379,18 @@ def erstelle_legende():
 
     # popup2.mainloop()  # Start the Tkinter loop for the legend popup
 
-def plot_popup(temp, LF):
-    """Display the temperature and humidity plot in a Tkinter popup."""
-    # Create a popup window
-    popup3 = tk.Toplevel()
-    popup3.title("Temperature and Humidity Plot")
-    popup3.geometry("800x600")  # Adjust the size of the popup
+# Simulate Real-Time Updates
+def simulate_real_time_updates(map_app, visualizer, plot_updater, full_data):
+    """Simulate incoming data and update the map and plot."""
+    simulator = RealTimeDataSimulator(full_data)
+    for new_data in simulator.datastream():
+        coordinates = [(lat, lon, temp, humidity) for lat, lon, temp, humidity in new_data]
+        humidity_data = [humidity for _, _, _, humidity in new_data]
+        temp_data = [temp for _, _, temp, _ in new_data]
 
-    # Implementieren der Daten (Raumtemperatur(temp)) und (Luftfeuchtigkeit(LF))
-    #Für die X achse wird die Anzahl werte von der Raumtemperatur genommen da sie gleich viele werte hat wie die Luftfeuchtigkeit
-    x = list(range(len(temp)))
-    y1 = temp
-    y2 = LF
+        visualizer.update_markers_and_paths(coordinates, humidity_data)
+        plot_updater.update_plot(temp_data, humidity_data)
 
-    # Neues Figure- und Axes-Objekt erstellen
-    fig, ax1 = plt.subplots(figsize=(10, 10))
-
-    # Zweites Axes erstellen, das dieselbe x-Achse teilt
-    ax2 = ax1.twinx()
-
-    # Daten auf jedem Axes plotten
-    ax1.plot(x, y1, 'b-', label='Temperatur')
-    ax2.plot(x, y2, 'r-', label='Luftfeuchtigkeit')
-
-    # Y-Achsen-Beschriftungen festlegen
-    ax1.set_ylabel('Temperatur', color='b')
-    ax2.set_ylabel('Luftfeuchtigkeit', color='r')
-
-    # X-Achsen-Beschriftung hinzufügen
-    ax1.set_xlabel('Zurückgelegte Strecke in %', color='g')
-
-    #X-Achsen-Beschriftungen in Prozent festlegen
-    ax1.set_xlim(0, len(x) - 1)
-    ax1.xaxis.set_major_locator(ticker.MultipleLocator((len(x)-1) / 10))
-    ax1.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(round(x / (len(temp) - 1) * 100))}%'))
-
-    # Embed the Matplotlib figure into the Tkinter popup
-    canvas = FigureCanvasTkAgg(fig, master=popup3)
-    canvas.draw()
-    canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-
-    # Add a close button
-    close_button = ttk.Button(popup3, text="Close", command=popup3.destroy)
-    close_button.pack(pady=10)
-
-    # popup3.mainloop()
 
 # Main Execution
 if __name__ == "__main__":
@@ -364,20 +400,26 @@ if __name__ == "__main__":
     selected_url = selector.map_options()
     print("Selected URL:", selected_url)
 
+    # Fetch data
+    route_data = RouteData(selected_url)
+    full_data = route_data.parse_data()
+
     # Initialize Map Application
     app = MapApp()
 
-    # Fetch route data
-    route_url = selected_url
-    route_data = RouteData(route_url)
-    coordinates, humidity_data, temp, LF = route_data.parse_data()
-
     # Visualize route
-    visualizer = RouteVisualizer(app, coordinates, humidity_data)
-    visualizer.visualize()
+    visualizer = RouteVisualizer(app, [], [])
+    plot_updater = Plot([], [])
 
     # Abbildung anzeigen
-    plot_popup(temp, LF)
+    # Initialize the plot popup
+    plot_updater.initialize_plot(app.root)
     erstelle_legende()
-    # Run the Tkinter app
+
+    # Start real-time simulation on a new thread
+    threading.Thread(target=simulate_real_time_updates,
+                     args=(app, visualizer, plot_updater, full_data),
+                     daemon=True).start()
+
+    # Run the app
     app.run()
