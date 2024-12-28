@@ -1,14 +1,11 @@
+import re
 import time
 import tkinter as tk
 from tkinter import messagebox
-import re
-import threading
-import random
-import tkintermapview
-import requests
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 from tkinter import ttk
+import matplotlib.pyplot as plt
+import requests
+import tkintermapview
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
