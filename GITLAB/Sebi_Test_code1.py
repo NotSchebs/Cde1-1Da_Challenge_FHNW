@@ -61,9 +61,14 @@ class RouteData:
 
     @staticmethod
     def fetch_data(url):
-        """Request data from a URL and return as plain text"""
-        response = requests.get(url, verify=False) # to ignore insecure website
-        return response.text
+        """Request data from a URL and return as plain text."""
+        try:
+            response = requests.get(url, verify=False, timeout=10)  # Set timeout for safety
+            response.raise_for_status()  # Raise exception for HTTP errors
+            return response.text
+        except requests.RequestException as e:
+            print(f"Error fetching data from URL: {e}")
+            return ""
 
     def parse_data(self):
         """Parse the CSV route data into a list of (lat, lon, temperature, humidity) tuples"""
@@ -95,7 +100,7 @@ class RouteSelector:
         self.server_option = 'https://fl-17-240.zhdk.cloud.switch.ch/'  # Default server URL
         self.default_options = [
             ('Route Map demo1',
-             self.server_option + 'containers/grp2/routes/demo?start=0&end=-1&format=csv'),
+             self.server_option + 'containers/grp2/routes/demo1?start=0&end=-1&format=csv'),
             ('Route Map demo2',
              self.server_option + 'containers/grp2/routes/demo2_extremvieledaten?start=0&end=-1&format=csv')
         ]
@@ -391,6 +396,21 @@ def simulate_real_time_updates(map_app, visualizer, plot_updater, full_data):
         visualizer.update_markers_and_paths(coordinates, humidity_data)
         plot_updater.update_plot(temp_data, humidity_data)
 
+def simulate_real_time_updates(app, visualizer, plot_updater, full_data, index=0):
+    """Simulate incoming data and update the map and plot using Tkinter's after."""
+    if index < len(full_data):
+        # Fetch the next chunk of data
+        new_data = full_data[:index + 1]
+        coordinates = [(lat, lon, temp, humidity) for lat, lon, temp, humidity in new_data]
+        humidity_data = [humidity for _, _, _, humidity in new_data]
+        temp_data = [temp for _, _, temp, _ in new_data]
+
+        # Update the map and plot
+        visualizer.update_markers_and_paths(coordinates, humidity_data)
+        plot_updater.update_plot(temp_data, humidity_data)
+
+        # Schedule the next update
+        app.root.after(50, simulate_real_time_updates, app, visualizer, plot_updater, full_data, index + 1)
 
 # Main Execution
 if __name__ == "__main__":
@@ -416,10 +436,7 @@ if __name__ == "__main__":
     plot_updater.initialize_plot(app.root)
     erstelle_legende()
 
-    # Start real-time simulation on a new thread
-    threading.Thread(target=simulate_real_time_updates,
-                     args=(app, visualizer, plot_updater, full_data),
-                     daemon=True).start()
+    simulate_real_time_updates(app, visualizer, plot_updater, full_data)
 
     # Run the app
     app.run()
