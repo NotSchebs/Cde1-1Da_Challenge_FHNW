@@ -285,10 +285,20 @@ if __name__ == "__main__":
         if route_data.has_new_data():
             parsed_data = route_data.parse_data()
             if parsed_data:  # Only update if there is valid data
+                # Update map visualizer
                 visualizer.update_markers_and_paths(parsed_data, [])
                 print("Map updated with new data.")
+
+                # Extract temperature and humidity data
+                temp_data = [point[2] for point in parsed_data]  # Temperature
+                humidity_data = [point[3] for point in parsed_data]  # Humidity
+
+                # Update the plot
+                plot_updater.update_plot(temp_data, humidity_data)
+                print("Plot updated with new data.")
         # Reschedule the function
         app.root.after(1000, update_visualization)  # Check every second
+
 
     # Function to start MQTT
     def start_mqtt():
@@ -303,6 +313,7 @@ if __name__ == "__main__":
 
     # Initialize Visualizer
     visualizer = RouteVisualizer(app, [], [])
+
 
     # Create and initialize plot
     plot_updater = Plot([], [])
