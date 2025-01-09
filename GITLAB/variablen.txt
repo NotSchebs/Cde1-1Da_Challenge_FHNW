@@ -1,0 +1,5 @@
+# Konfigurationsdatei für Variablen
+container=grp2
+route=demo1
+company=migros
+httpadresse="fl-17-240.zhdk.cloud.switch.ch"
