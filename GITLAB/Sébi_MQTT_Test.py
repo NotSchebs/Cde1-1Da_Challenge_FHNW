@@ -15,7 +15,7 @@ import requests
 import tkintermapview
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import threading
-
+from Venvstart2 import Venvstart
 
 
 class MapApp:
@@ -273,6 +273,7 @@ def erstelle_legende():
 # Main Execution
 # Main Execution
 if __name__ == "__main__":
+    Venvstart()
     # Initialize Map Application
     app = MapApp()
 
