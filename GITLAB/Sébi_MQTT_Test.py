@@ -150,31 +150,29 @@ class RouteVisualizer:
 
     def update_markers_and_paths(self, new_coordinates, humidity_data):
         """Update the map with new coordinates dynamically."""
+        last_point = None  # Keep track of the last drawn point
         for i, (lat, lon, temp, humidity) in enumerate(new_coordinates):
             current_point = (lat, lon)
 
-            # Skip the point if it has been visited already (don't reprocess it)
+            # Skip the point if it has been visited already
             if current_point in self.visited_points:
                 continue
 
-            # Mark the point as visited
             self.visited_points.add(current_point)
 
-            # Add marker for the first point (start)
             if i == 0 and not self.start_point_added:
                 self.map_app.add_marker(lat, lon, f"Start: {humidity}%")
-                self.map_app.set_initial_position(lat, lon, zoom=10)  # Set map view on start point
+                self.map_app.set_initial_position(lat, lon, zoom=10)
                 self.start_point_added = True
 
-            # Add a marker when humidity changes
             elif humidity != self.humidity_data[-1] if self.humidity_data else True:
                 self.map_app.add_marker(lat, lon, f"Humidity: {humidity}%")
 
-            # Draw path between consecutive coordinates
-            if i > 0:
-                prev_lat, prev_lon, _, _ = new_coordinates[i - 1]
-                self.map_app.add_path([(prev_lat, prev_lon), (lat, lon)], color=self.get_color(temp))
+            # Draw path between the last point and the current one
+            if last_point:
+                self.map_app.add_path([last_point, current_point], color=self.get_color(temp))
 
+            last_point = current_point
             self.humidity_data.append(humidity)
 
     @staticmethod
@@ -227,10 +225,10 @@ class Plot:
         self.canvas.draw()
 
     def update_plot(self, new_temp, new_humidity):
-        """Update the plot with new data."""
-        self.temp_data = new_temp
-        self.humidity_data = new_humidity
-        self.x = list(range(len(new_temp)))
+        """Update the plot by appending new data."""
+        self.temp_data.extend(new_temp)
+        self.humidity_data.extend(new_humidity)
+        self.x = list(range(len(self.temp_data)))
 
         self.line_temp.set_data(self.x, self.temp_data)
         self.line_humidity.set_data(self.x, self.humidity_data)
@@ -241,6 +239,7 @@ class Plot:
         self.ax2.autoscale_view()
 
         self.canvas.draw()
+
 
 # Funktion, um die Legende zu erstellen
 def erstelle_legende():
@@ -284,20 +283,18 @@ if __name__ == "__main__":
     def update_visualization():
         if route_data.has_new_data():
             parsed_data = route_data.parse_data()
-            if parsed_data:  # Only update if there is valid data
+            if parsed_data:
                 # Update map visualizer
-                visualizer.update_markers_and_paths(parsed_data, [])
-                print("Map updated with new data.")
+                visualizer.update_markers_and_paths(parsed_data, visualizer.humidity_data)
 
                 # Extract temperature and humidity data
-                temp_data = [point[2] for point in parsed_data]  # Temperature
-                humidity_data = [point[3] for point in parsed_data]  # Humidity
+                temp_data = [point[2] for point in parsed_data]
+                humidity_data = [point[3] for point in parsed_data]
 
                 # Update the plot
                 plot_updater.update_plot(temp_data, humidity_data)
-                print("Plot updated with new data.")
-        # Reschedule the function
-        app.root.after(1000, update_visualization)  # Check every second
+                print("Plot and map updated with new data.")
+        app.root.after(1000, update_visualization)
 
 
     # Function to start MQTT
