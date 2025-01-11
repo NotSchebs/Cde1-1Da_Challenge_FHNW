@@ -23,6 +23,7 @@ class RouteVisualizer:
             else:
                 if humidity != self.humidity_data[-1] if self.humidity_data else True:
                     self.map_app.add_marker(lat, lon, f"Humidity: {humidity}%")
+                    self.map_app.set_initial_position(lat, lon, zoom=10)
 
             if self.last_point:
                 self.map_app.add_path([self.last_point, current_point], color=self.get_color(temp))
