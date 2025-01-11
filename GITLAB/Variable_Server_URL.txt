@@ -1,0 +1,2 @@
+# Konfigurationsdatei für Variablen der https
+httpadresse='https://fl-17-240.zhdk.cloud.switch.ch/'
