@@ -1,21 +1,12 @@
 import json
-import time
 import paho.mqtt.client as mqtt
-import csv
-import io
-import sys
-import os
-import subprocess
-import re
 import tkinter as tk
-from tkinter import messagebox
 from tkinter import ttk
 import matplotlib.pyplot as plt
-import requests
 import tkintermapview
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import threading
 from Venvstart2 import Venvstart
+import threading
 
 class MapApp:
     def __init__(self, width=1200, height=1000, title="Map Viewer"):
