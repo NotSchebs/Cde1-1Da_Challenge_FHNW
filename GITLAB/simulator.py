@@ -1,11 +1,3 @@
-import re
-import tkinter as tk
-from tkinter import messagebox
-from tkinter import ttk
-import matplotlib.pyplot as plt
-import requests
-import tkintermapview
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import argparse
 import asyncio
 import configparser
