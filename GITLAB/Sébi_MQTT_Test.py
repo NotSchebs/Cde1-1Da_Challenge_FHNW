@@ -17,7 +17,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import threading
 from Venvstart2 import Venvstart
 
-
 class MapApp:
     def __init__(self, width=1200, height=1000, title="Map Viewer"):
         """Initialize the Tkinter window and map widget"""
@@ -147,10 +146,10 @@ class RouteVisualizer:
         self.humidity_data = humidity_data
         self.visited_points = set()  # Set to track unique coordinates
         self.start_point_added = False  # Flag to track if the start point is added
+        self.last_point = None  # Persist the last point between iterations
 
     def update_markers_and_paths(self, new_coordinates, humidity_data):
         """Update the map with new coordinates dynamically."""
-        last_point = None  # Keep track of the last drawn point
         for i, (lat, lon, temp, humidity) in enumerate(new_coordinates):
             current_point = (lat, lon)
 
@@ -164,15 +163,17 @@ class RouteVisualizer:
                 self.map_app.add_marker(lat, lon, f"Start: {humidity}%")
                 self.map_app.set_initial_position(lat, lon, zoom=10)
                 self.start_point_added = True
+            else:
+                # Add markers for other points if humidity changes
+                if humidity != self.humidity_data[-1] if self.humidity_data else True:
+                    self.map_app.add_marker(lat, lon, f"Humidity: {humidity}%")
 
-            elif humidity != self.humidity_data[-1] if self.humidity_data else True:
-                self.map_app.add_marker(lat, lon, f"Humidity: {humidity}%")
+            # Draw path between the last remembered point and the current one
+            if self.last_point:
+                self.map_app.add_path([self.last_point, current_point], color=self.get_color(temp))
 
-            # Draw path between the last point and the current one
-            if last_point:
-                self.map_app.add_path([last_point, current_point], color=self.get_color(temp))
-
-            last_point = current_point
+            # Update the last point for continuity in the next iteration
+            self.last_point = current_point
             self.humidity_data.append(humidity)
 
     @staticmethod
@@ -240,37 +241,48 @@ class Plot:
 
         self.canvas.draw()
 
+class LegendCreator:
+    """
+    A class to create and display a legend for temperature gradients.
+    """
+    def __init__(self, parent, route_visualizer):
+        """
+        Initialize the LegendCreator with a parent window and a RouteVisualizer instance.
 
-# Funktion, um die Legende zu erstellen
-def erstelle_legende():
-    popup2 = tk.Toplevel()  # Use Toplevel for non-blocking window
-    popup2.wm_title("Farbverlauf Legende")
+        :param parent: The parent window (Tk or Toplevel instance)
+        :param route_visualizer: The RouteVisualizer instance to fetch color mappings
+        """
+        self.parent = parent
+        self.route_visualizer = route_visualizer
 
-    label = ttk.Label(popup2, text="Farbverlauf für Temperaturen")
-    label.pack(side="top", fill="x", pady=10)
+    def erstelle_legende(self):
+        """
+        Creates a popup window displaying the temperature gradient legend.
+        """
+        popup2 = tk.Toplevel(self.parent)  # Use Toplevel for non-blocking window
+        popup2.wm_title("Farbverlauf Legende")
 
-    temperaturbereiche = [
-        ("unter 0", 0), (0, 9), (10, 14), (15, 19), (20, 24),
-        (25, 29), (30, 34), (35, 39), (40, 44), ("über 44", 50)
-    ]
+        label = ttk.Label(popup2, text="Farbverlauf für Temperaturen")
+        label.pack(side="top", fill="x", pady=10)
 
-    for (start, end) in temperaturbereiche:
-        frame = ttk.Frame(popup2)
-        farbe = RouteVisualizer.get_color((start if isinstance(start, int) else end - 10))
+        temperaturbereiche = [
+            ("unter 0", 0), (0, 9), (10, 14), (15, 19), (20, 24),
+            (25, 29), (30, 34), (35, 39), (40, 44), ("über 44", 50)
+        ]
 
-        beschriftung = f"{start}°C - {end}°C" if isinstance(start, int) else f"{start}"
+        for (start, end) in temperaturbereiche:
+            frame = ttk.Frame(popup2)
+            farbe = self.route_visualizer.get_color((start if isinstance(start, int) else end - 10))
 
-        farb_label = tk.Label(frame, text=beschriftung, background=farbe, width=20)
-        farb_label.pack(side="left", padx=10)
-        frame.pack(side="top", fill="x", pady=5)
+            beschriftung = f"{start}°C - {end}°C" if isinstance(start, int) else f"{start}"
 
-    schliessen_button = ttk.Button(popup2, text="Schließen", command=popup2.destroy)
-    schliessen_button.pack(side="top", pady=10)
+            farb_label = tk.Label(frame, text=beschriftung, background=farbe, width=20)
+            farb_label.pack(side="left", padx=10)
+            frame.pack(side="top", fill="x", pady=5)
 
-    # popup2.mainloop()  # Start the Tkinter loop for the legend popup
+        schliessen_button = ttk.Button(popup2, text="Schließen", command=popup2.destroy)
+        schliessen_button.pack(side="top", pady=10)
 
-
-# Main Execution
 # Main Execution
 if __name__ == "__main__":
     Venvstart()
@@ -295,7 +307,7 @@ if __name__ == "__main__":
                 # Update the plot
                 plot_updater.update_plot(temp_data, humidity_data)
                 print("Plot and map updated with new data.")
-        app.root.after(1000, update_visualization)
+        app.root.after(500, update_visualization)
 
 
     # Function to start MQTT
@@ -317,11 +329,13 @@ if __name__ == "__main__":
     plot_updater = Plot([], [])
     plot_updater.initialize_plot(app.root)
 
-    # Display legend
-    erstelle_legende()
+    # Initialize LegendCreator
+    legend_creator = LegendCreator(app.root, visualizer)
+    # Create and display the legend
+    legend_creator.erstelle_legende()
 
     # Schedule the first update
-    app.root.after(1000, update_visualization)
+    app.root.after(500, update_visualization)
 
     # Run the app
     try:
