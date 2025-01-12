@@ -5,10 +5,16 @@ from plot import Plot
 from legend_creator import LegendCreator
 from route_selector import RouteSelector
 from Venvstart2 import Venvstart
+from profile_scan import ConfigProfileManager
 import threading
 
 if __name__ == "__main__":
 
+    ini_file = 'config-switch.ini'
+    profile_file = 'profile.txt'
+
+    # Erstelle eine Instanz der Klasse
+    manager = ConfigProfileManager(ini_file, profile_file)
     # Use RouteSelector to get user inputs
     selector = RouteSelector()
     broker_url, company, container, route = selector.map_options()
