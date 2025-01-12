@@ -1,0 +1,4 @@
+route_name,Company,Container,route_path
+demo1,migros,grp2,https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo1?start=0&end=-1&format=csv
+demo2,migros,grp2,https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo2_extremvieledaten?start=0&end=-1&format=csv
+demo3,migros,grp2,https://fl-17-240.zhdk.cloud.switch.ch/containers/grp2/routes/demo3?start=0&end=-1&format=csv
