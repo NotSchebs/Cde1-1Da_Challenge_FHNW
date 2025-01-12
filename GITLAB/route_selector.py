@@ -1,19 +1,15 @@
 import tkinter as tk
 from tkinter import messagebox
-import re
 import pandas as pd
 
 class RouteSelector:
     def __init__(self, options=None):
-        """Initialize the selector with route options.
-        Default options are used if none are provided.
-        """
+        """Initialize the selector with route options."""
         self.server_option = self.load_server_url()  # Default server URL loaded from file
         self.default_options = self.load_routes_from_csv()  # Load routes from CSV file
-        # Use provided options if available; otherwise, use default options
         self.options = options if options is not None else self.default_options
-        self.selected_server = self.server_option
-        self.selected_url = None  # Store the selected route URL
+        self.selected_server = None  # Selected server URL
+        self.selected_route_data = None  # Selected route details
 
     @staticmethod
     def load_server_url():
@@ -22,7 +18,9 @@ class RouteSelector:
             with open('Variable_Server_URL.txt', 'r') as file:
                 for line in file:
                     if line.startswith("httpadresse="):
-                        return line.split('=')[1].strip().strip("'")
+                        server_url = line.split('=')[1].strip().strip("'")
+                        print(f"Loaded server URL: {server_url}")  # Debug statement
+                        return server_url
         except FileNotFoundError:
             messagebox.showerror("Error", "Configuration file not found. Exiting...")
             raise SystemExit("Configuration file not found.")
@@ -37,9 +35,14 @@ class RouteSelector:
             csv_file = 'routes.csv'
             routes_df = pd.read_csv(csv_file)
             routes = [
-                (row['route_name'], f"{row['route_path']}")
+                {
+                    "route_name": row["route_name"],
+                    "company": row["Company"],
+                    "container": row["Container"],
+                }
                 for _, row in routes_df.iterrows()
             ]
+            print(f"Loaded routes: {routes}")  # Debug statement
             return routes
         except FileNotFoundError:
             messagebox.showerror("Error", "Routes CSV file not found. Exiting...")
@@ -48,30 +51,21 @@ class RouteSelector:
             messagebox.showerror("Error", f"Error reading routes CSV file: {e}")
             raise SystemExit(f"Error reading routes CSV file: {e}")
 
-    @staticmethod
-    def is_valid_url(url):
-        """Validate the URL using a regular expression."""
-        url_regex = re.compile(
-            r'^(?:http|https)://'  # http:// or https://
-            r'(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}'  # domain
-            r'(?::\d{2,5})?'  # optional port
-            r'(?:[/?#]\S*)?$', re.IGNORECASE  # path/query fragment
-        )
-        return re.match(url_regex, url) is not None
-
     def submit_server_selection(self, var, server_popup, custom_entry):
         """Handle the submission of the selected server option or custom server URL."""
         selected_option = var.get()
 
         if selected_option == "Custom Server URL":
             custom_url = custom_entry.get().strip()
-            if self.is_valid_url(custom_url):
+            if custom_url:
                 self.selected_server = custom_url
+                print(f"Custom server URL selected: {self.selected_server}")  # Debug statement
                 server_popup.destroy()
             else:
                 messagebox.showwarning("Invalid URL", "Please enter a valid server URL.")
         elif selected_option:
             self.selected_server = selected_option
+            print(f"Server URL selected: {self.selected_server}")  # Debug statement
             server_popup.destroy()
         else:
             messagebox.showwarning("No selection", "Please select a server or enter a custom URL.")
@@ -81,10 +75,8 @@ class RouteSelector:
         server_popup = tk.Tk()
         server_popup.title("Select Server")
 
-        # Variable to store the selected option
         var = tk.StringVar(value="")
 
-        # Radio buttons for default server and custom server
         tk.Radiobutton(
             server_popup,
             text=f"Original Server: {self.server_option}",
@@ -99,11 +91,9 @@ class RouteSelector:
             value="Custom Server URL"
         ).pack(anchor="w")
 
-        # Entry box for custom server input
         custom_entry = tk.Entry(server_popup)
         custom_entry.pack(anchor="w", padx=20, pady=5)
 
-        # Submit button to confirm server selection
         submit_button = tk.Button(
             server_popup,
             text="Submit",
@@ -114,34 +104,34 @@ class RouteSelector:
         server_popup.wait_window()
 
     def submit_route_selection(self, var, route_popup):
-        """Handle the submission of the selected route option or open a custom URL popup."""
+        """Handle the submission of the selected route option."""
         selected_option = var.get()
 
         if selected_option == "Custom Map URL":
             route_popup.destroy()
             self.open_custom_url_popup()
-        elif selected_option:
-            self.selected_url = selected_option
+        elif selected_option.isdigit():
+            self.selected_route_data = self.options[int(selected_option)]
+            print(f"Route selected: {self.selected_route_data}")  # Debug statement
             route_popup.destroy()
         else:
-            messagebox.showwarning("No selection", "Please select a route or enter a custom URL.")
+            messagebox.showwarning("No selection", "Please select a route.")
 
     def select_route(self):
-        """Create the popup to select a route or enter a custom route URL."""
+        """Create the popup to select a route."""
         route_popup = tk.Tk()
         route_popup.title("Select Route")
 
-        # Variable to store the selected option
         var = tk.StringVar(value="")
 
-        # Radio buttons for route options
-        for label, url in self.options:
-            tk.Radiobutton(route_popup, text=label, variable=var, value=url).pack(anchor="w")
+        for idx, route in enumerate(self.options):
+            label = f"{route['route_name']} ({route['company']}/{route['container']})"
+            tk.Radiobutton(route_popup, text=label, variable=var, value=str(idx)).pack(anchor="w")
 
-        # Radio button for custom route URL
-        tk.Radiobutton(route_popup, text="Custom Map URL", variable=var, value="Custom Map URL").pack(anchor="w")
+        tk.Radiobutton(
+            route_popup, text="Custom Map URL", variable=var, value="Custom Map URL"
+        ).pack(anchor="w")
 
-        # Submit button to confirm route selection
         submit_button = tk.Button(
             route_popup,
             text="Submit",
@@ -152,7 +142,7 @@ class RouteSelector:
         route_popup.wait_window()
 
     def open_custom_url_popup(self):
-        """Open a new popup to input a custom route URL with multiple fields."""
+        """Open a new popup to input a custom route with multiple fields."""
         custom_popup = tk.Tk()
         custom_popup.title("Enter Custom Route Details")
 
@@ -164,64 +154,41 @@ class RouteSelector:
         company_entry = tk.Entry(custom_popup, width=40)
         company_entry.pack(anchor="w", padx=10, pady=2)
 
-        tk.Label(custom_popup, text="Route Path:").pack(anchor="w", padx=10, pady=2)
-        route_address_entry = tk.Entry(custom_popup, width=40)
-        route_address_entry.pack(anchor="w", padx=10, pady=2)
-
         tk.Label(custom_popup, text="Container:").pack(anchor="w", padx=10, pady=2)
         container_entry = tk.Entry(custom_popup, width=40)
         container_entry.pack(anchor="w", padx=10, pady=2)
 
-        # Option buttons for actions
+        def handle_action(save):
+            route = route_entry.get().strip()
+            company = company_entry.get().strip()
+            container = container_entry.get().strip()
+
+            if all([route, company, container]):
+                self.selected_route_data = {
+                    "route_name": route,
+                    "company": company,
+                    "container": container,
+                }
+                print(f"Custom Route Details: {self.selected_route_data}")
+
+                if save:
+                    self.save_custom_route(route, company, container)
+
+                custom_popup.destroy()
+            else:
+                messagebox.showwarning("Incomplete Details", "Please fill in all fields.")
+
         tk.Button(
-            custom_popup,
-            text="Run Once",
-            command=lambda: self.handle_custom_route(route_entry, company_entry, route_address_entry, container_entry, save=False, popup=custom_popup)
+            custom_popup, text="Run Once", command=lambda: handle_action(save=False)
         ).pack(pady=5)
 
         tk.Button(
-            custom_popup,
-            text="Run and Save",
-            command=lambda: self.handle_custom_route(route_entry, company_entry, route_address_entry, container_entry, save=True, popup=custom_popup)
+            custom_popup, text="Save and Run", command=lambda: handle_action(save=True)
         ).pack(pady=5)
 
         custom_popup.mainloop()
 
-    def submit_custom_route(self, route, company, route_path, container):
-        """Submit the custom route for immediate use in the program."""
-        print("Submitting the custom route for immediate use:")
-        print(f"Route Name: {route}\nCompany: {company}\nRoute Path: {route_path}\nContainer: {container}")
-        # Hier kannst du die Daten weiterleiten, z. B. an die Karte oder andere Komponenten
-        self.selected_url = route_path  # Sicherstellen, dass die Route URL korrekt gesetzt ist
-
-    def handle_custom_route(self, route_entry, company_entry, route_address_entry, container_entry, save, popup):
-        """Handle custom route input, optionally saving it to the CSV file."""
-        route = route_entry.get().strip()
-        company = company_entry.get().strip()
-        route_path = route_address_entry.get().strip()
-        container = container_entry.get().strip()
-
-        if all([route, company, route_path, container]):
-            print(
-                f"Custom Route Details:\nRoute Name: {route}\nCompany: {company}\nRoute Path: {route_path}\nContainer: {container}")
-
-            # Ensure the route path is complete by adding the server prefix
-            full_route_path = self.selected_server + route_path if not route_path.startswith("http") else route_path
-            self.selected_url = full_route_path
-
-            if save:
-                self.save_custom_route(route, company, full_route_path, container)
-
-            # Prevent duplicate entries in self.options
-            if (route, full_route_path) not in self.options:
-                self.options.append((route, full_route_path))
-                print("Options updated:", self.options)
-
-            popup.destroy()  # Close the popup after handling input
-        else:
-            messagebox.showwarning("Incomplete Details", "Please fill in all fields.")
-
-    def save_custom_route(self, route, company, route_path, container):
+    def save_custom_route(self, route, company, container):
         """Save the custom route to the CSV file."""
         try:
             csv_file = 'routes.csv'
@@ -229,7 +196,6 @@ class RouteSelector:
             new_row = {
                 'route_name': route,
                 'Company': company,
-                'route_path': route_path,
                 'Container': container
             }
             routes_df = pd.concat([routes_df, pd.DataFrame([new_row])], ignore_index=True)
@@ -240,27 +206,21 @@ class RouteSelector:
 
     def map_options(self):
         """Main method to run server selection and then route selection."""
-        # First, select the server
         self.select_server()
 
         if not self.selected_server:
             messagebox.showerror("Error", "Server selection failed.")
             raise SystemExit("Server selection failed.")
 
-        # Update route URLs with the selected server
-        self.options = [
-            (label, self.selected_server + url if not url.startswith("http") else url)
-            for label, url in self.default_options
-        ]
-
-        # Then, select the route
         self.select_route()
 
-        if not self.selected_url:
+        if not self.selected_route_data:
             messagebox.showerror("Error", "Route selection failed.")
             raise SystemExit("Route selection failed.")
 
-        print(f"Using route URL for map: {self.selected_url}")
-        return self.selected_url
-
-
+        return (
+            self.selected_server,
+            self.selected_route_data["company"],
+            self.selected_route_data["container"],
+            self.selected_route_data["route_name"],
+        )

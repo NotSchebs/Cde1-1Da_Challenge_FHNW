@@ -3,16 +3,25 @@ from route_data import RouteData
 from route_visualizer import RouteVisualizer
 from plot import Plot
 from legend_creator import LegendCreator
+from route_selector import RouteSelector
 from Venvstart2 import Venvstart
 import threading
 
 if __name__ == "__main__":
-    Venvstart()
-    # Initialize Map Application
+
+    # Use RouteSelector to get user inputs
+    selector = RouteSelector()
+    broker_url, company, container, route = selector.map_options()
+
+    # Start the virtual environment (if needed)
+    Venvstart(route)
+
+
+    # Initialize the Map Application
     app = MapApp()
 
-    # Initialize Route Data and MQTT
-    route_data = RouteData()
+    # Initialize Route Data with selected inputs
+    route_data = RouteData(broker_url, 9001, company, container, route)
 
     # Function to update visualization dynamically
     def update_visualization():
@@ -31,35 +40,29 @@ if __name__ == "__main__":
                 print("Plot and map updated with new data.")
         app.root.after(500, update_visualization)
 
-
-    # Function to start MQTT
+    # Function to start MQTT in a separate thread
     def start_mqtt():
-        """Start receiving data via MQTT."""
         print("Starting MQTT to receive data...")
         route_data.receive_csv_from_mqtt()
 
-    # Start MQTT in a separate thread
-    import threading
     mqtt_thread = threading.Thread(target=start_mqtt, daemon=True)
     mqtt_thread.start()
 
     # Initialize Visualizer
     visualizer = RouteVisualizer(app, [], [])
 
-
-    # Create and initialize plot
+    # Create and initialize the plot
     plot_updater = Plot([], [])
     plot_updater.initialize_plot(app.root)
 
     # Initialize LegendCreator
     legend_creator = LegendCreator(app.root, visualizer)
-    # Create and display the legend
     legend_creator.erstelle_legende()
 
-    # Schedule the first update
+    # Schedule the first visualization update
     app.root.after(500, update_visualization)
 
-    # Run the app
+    # Run the application
     try:
         app.run()
     except KeyboardInterrupt:
