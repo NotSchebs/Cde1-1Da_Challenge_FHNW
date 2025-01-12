@@ -4,21 +4,32 @@ from route_visualizer import RouteVisualizer
 from plot import Plot
 from legend_creator import LegendCreator
 from route_selector import RouteSelector
-from Venvstart2 import Venvstart
+from Venvstart import Venvstart
 from profile_scan import ConfigProfileManager
 import threading
+import os
 
 if __name__ == "__main__":
 
-    ini_file = 'config-switch.ini'
-    profile_file = 'profile.txt'
-
-    # Erstelle eine Instanz der Klasse
-    manager = ConfigProfileManager(ini_file, profile_file)
     # Use RouteSelector to get user inputs
     selector = RouteSelector()
     broker_url, company, container, route = selector.map_options()
 
+    # Dynamischer Pfad basierend auf der Position des Skripts
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Dynamischer Pfad zur config-switch.ini
+    ini_file = os.path.join(script_dir, "..", "config-switch.ini")
+    profile_file = os.path.join(script_dir, "profile.txt")
+
+    # Erstelle eine Instanz der Klasse
+    manager = ConfigProfileManager(ini_file, profile_file, company, container)
+    # Aktualisiere die INI-Datei
+    manager.update_ini_profile()  # Profile aktualisieren
+    manager.update_ini_company()  # Company aktualisieren
+    manager.update_ini_container()  # Container aktualisiere
+
+
+#-------------------------------------------------------------------
     # Start the virtual environment (if needed)
     Venvstart(route)
 

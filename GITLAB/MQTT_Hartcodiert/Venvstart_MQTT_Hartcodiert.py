@@ -1,11 +1,9 @@
 import sys
 import os
 import subprocess
+import time
 
-def Venvstart(route):
-    """
-    Start the virtual environment and run the simulator with the specified route.
-    """
+def Venvstart():
     python_executable = sys.executable
     env = os.environ.copy()
     env["VIRTUAL_ENV"] = os.environ.get("VIRTUAL_ENV", "")
@@ -15,14 +13,14 @@ def Venvstart(route):
         process = subprocess.Popen(
             [
                 python_executable,
-                "./simulator.py",
-                f"./data/{route}.geojson",  # Dynamic route
-                "-c",
-                "./config-switch.ini",
+                os.path.join(".", "..", "simulator.py"),  # simulator.py eine Ebene höher
+                os.path.join(".", "..", "data", "demo1.geojson"),  # GeoJSON-Datei als 'file'-Argument
+                "--config",
+                os.path.join(".", "..", "config-switch.ini"),  # INI-Datei als '--config'-Argument
             ],
             env=env,
         )
-        print(f"Simulator started with PID: {process.pid}, using route: {route}")
+        print(f"Simulator started with PID: {process.pid}")
     except FileNotFoundError as e:
         print(f"File not found: {e}")
     except Exception as e:

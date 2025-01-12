@@ -1,9 +1,11 @@
 import sys
 import os
 import subprocess
-import time
 
-def Venvstart():
+def Venvstart(route):
+    """
+    Start the virtual environment and run the simulator with the specified route.
+    """
     python_executable = sys.executable
     env = os.environ.copy()
     env["VIRTUAL_ENV"] = os.environ.get("VIRTUAL_ENV", "")
@@ -13,10 +15,10 @@ def Venvstart():
         process = subprocess.Popen(
             [
                 python_executable,
-                "./simulator.py",
-                "./data/demo2_extremvieledaten.geojson",
-                "-c",
-                "./config-switch.ini",
+                os.path.join(".", "..", "simulator.py"),  # simulator.py eine Ebene höher
+                os.path.join(".", "..", "data", route+".geojson"),  # GeoJSON-Datei als 'file'-Argument
+                "--config",
+                os.path.join(".", "..", "config-switch.ini"),  # INI-Datei als '--config'-Argument
             ],
             env=env,
         )
