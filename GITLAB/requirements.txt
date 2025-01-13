@@ -1,4 +1,4 @@
-paho-mqtt==2.0.0          # Für MQTT-Kommunikation
+paho-mqtt<2.0.0           # Für MQTT-Kommunikation
 requests==2.31.0          # Für HTTP-Anfragen
 matplotlib==3.7.1         # Für Diagrammvisualisierung
 tkintermapview            # Für interaktive Kartenansichten
