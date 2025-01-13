@@ -14,7 +14,7 @@ Dieses Projekt ist eine umfassende Python-Anwendung zur Erstellung und Visualisi
 ### Root-Dateien
 - **`main.py`**: Der Einstiegspunkt der Anwendung. Initialisiert das Programm und verbindet alle Module.
 - **`legend_creator.py`**: Generiert Legenden für Routen-Karten, um Klarheit und bessere Visualisierungen zu gewährleisten.
-- **`map_app.py`**: Verantwortlich für kartenbezogene Funktionen, einschließlich Laden und Integration von Routen.
+- **`map_app.py`**: Verantwortlich für kartenbezogene Funktionen, einschliesslich Laden und Integration von Routen.
 - **`plot.py`**: Visualisiert Daten und erstellt Graphen zu Routen.
 - **`profile_scan.py`**: Scannt und analysiert Profile, die sich auf Routen beziehen, und liefert detaillierte Einblicke in die Daten.
 - **`route_data.py`**: Verarbeitet und verwaltet Daten zu Routen.
@@ -22,7 +22,7 @@ Dieses Projekt ist eine umfassende Python-Anwendung zur Erstellung und Visualisi
 - **`route_visualizer.py`**: Erstellt interaktive und benutzerfreundliche Visualisierungen für Routen.
 - **`MQTT_Hartcodiert.py`**: Handhabt die MQTT-Integration, um in Echtzeit Daten zu empfangen und Updates zu verarbeiten.
 - **`Venvstart.py`**: Ein Hilfsskript zur Initialisierung und Verwaltung der virtuellen Umgebung.
-- **`requirements.txt`**: Listet die benötigten Python-Bibliotheken für das Projekt.
+- **`requirements.txt`**: Listet die benötigten Python-Libraries für das Projekt.
 - **`.gitignore`**: Definiert Dateien und Verzeichnisse, die von der Versionskontrolle ignoriert werden sollen.
 - **`.name`**: Projektname für die lokale Entwicklung.
 
@@ -65,7 +65,7 @@ Dieser Ordner enthält Skripte, die speziell für HTTP-basierte Funktionen der A
 ### GeoJSON-Dateien
 Diese Dateien enthalten Geodaten für verschiedene Routen:
 
-- **`demo.geojson`**: Beispielfile für grundlegende Tests.
+- **`demo.geojson`**: Beispieldatei für grundlegende Tests.
 - **`demo1.geojson`**: Detaillierte Beispieldaten für Simulationen.
 - **`demo2_extremvieledaten.geojson`**: Datenintensive GeoJSON-Datei.
 - **`demo3.geojson`**: Zusätzliche Beispieldaten.
