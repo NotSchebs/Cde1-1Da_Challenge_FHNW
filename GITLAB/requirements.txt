@@ -1,2 +1,5 @@
-paho-mqtt==2.0.0
-requests==2.31.0
+paho-mqtt==2.0.0          # Für MQTT-Kommunikation
+requests==2.31.0          # Für HTTP-Anfragen
+matplotlib==3.7.1         # Für Diagrammvisualisierung
+tkintermapview            # Für interaktive Kartenansichten
+pandas==1.5.3             # Für Datenmanipulation und CSV-Verarbeitung
