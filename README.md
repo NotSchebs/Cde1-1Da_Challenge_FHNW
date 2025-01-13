@@ -152,6 +152,3 @@ Diese Dateien unterstützen die Projektverwaltung in IntelliJ IDEA:
 ## Lizenz
 Dieses Projekt ist unter der MIT-Lizenz lizenziert. Siehe die Datei LICENSE für Details.
 
-## Kontakt
-Bei Fragen oder Unterstützung, kontaktiere uns über [E-Mail/Kommunikationskanal].
-
