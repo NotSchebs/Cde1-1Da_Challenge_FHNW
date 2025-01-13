@@ -1,13 +1,15 @@
 class RouteVisualizer:
     def __init__(self, map_app, coordinates, humidity_data):
+        # Initialize the visualizer with map application, coordinates, and humidity data
         self.map_app = map_app
         self.coordinates = coordinates
         self.humidity_data = humidity_data
-        self.visited_points = set()
-        self.start_point_added = False
-        self.last_point = None
+        self.visited_points = set()  # Tracks points already processed
+        self.start_point_added = False  # Ensures the start point is added only once
+        self.last_point = None  # Stores the last plotted point
 
     def update_markers_and_paths(self, new_coordinates, humidity_data):
+        # Add markers and paths for new coordinates and update humidity data
         for i, (lat, lon, temp, humidity) in enumerate(new_coordinates):
             current_point = (lat, lon)
 
@@ -33,6 +35,7 @@ class RouteVisualizer:
 
     @staticmethod
     def get_color(temperature):
+        # Map temperature to a color
         if temperature < 0:
             return 'lightcyan'
         elif 0 <= temperature < 10:
